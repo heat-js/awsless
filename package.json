@@ -1,0 +1,51 @@
+{
+	"name": "@heat/awsless",
+	"version": "0.0.1",
+	"license": "MIT",
+	"bin": {
+		"awsless": "./cli/deploy.js"
+	},
+	"scripts": {
+		"test": "../../../node_modules/.bin/jest",
+		"deploy": "../../../node_modules/.bin/coffee -t ./cli/deploy.coffee",
+		"patch": "yarn version --patch; ./node_modules/.bin/ncp",
+		"minor": "yarn version --minor; ./node_modules/.bin/ncp",
+		"major": "yarn version --major; ./node_modules/.bin/ncp"
+	},
+	"babel": {
+		"plugins": [
+			"@babel/plugin-transform-modules-commonjs"
+		]
+	},
+	"jest": {
+		"preset": "jest-preset-coffeescript",
+		"testEnvironment": "node",
+		"rootDir": "./test/"
+	},
+	"dependencies": {
+		"@babel/core": "^7.12.3",
+		"@babel/plugin-transform-modules-commonjs": "^7.12.1",
+		"filesize": "^6.1.0",
+		"function-cache": "^1.0.5",
+		"js-yaml-cloudformation-schema": "^1.0.0",
+		"jszip": "^3.5.0",
+		"length-stream": "^0.1.1",
+		"ora": "^5.1.0",
+		"parse-domain": "^3.0.3",
+		"prompt-confirm": "^2.0.4",
+		"rollup": "^2.33.3",
+		"rollup-plugin-coffee-script": "^2.0.0",
+		"rollup-plugin-commonjs": "^10.1.0",
+		"rollup-plugin-node-resolve": "^5.2.0",
+		"rollup-plugin-terser": "^7.0.2",
+		"stream-to-buffer": "^0.1.0",
+		"tty-table": "^4.1.3"
+	},
+	"devDependencies": {
+		"@babel/core": "^7.5.0",
+		"@heat/npm-coffee-publisher": "^0.1.6",
+		"coffeescript": "^2.5.1",
+		"jest": "^24.8.0",
+		"jest-preset-coffeescript": "1.1.1"
+	}
+}

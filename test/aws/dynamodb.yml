@@ -1,0 +1,27 @@
+
+# TestTable:
+#   Type: Custom::DynamoDB::Table
+#   Properties:
+#     TableName: ${var:Config.Stack}__test
+#     # BillingMode: PROVISIONED
+#     BillingMode: PAY_PER_REQUEST
+#     PointInTimeRecovery: true
+#     TTL: ttl
+#     # Stream: NEW_IMAGE
+#     # WCU: 25
+#     # RCU: 10
+
+#     AttributeDefinitions:
+#       - Name: id
+#         Type: S
+
+#     KeySchema:
+#       - Name: id
+#         Type: HASH
+
+#     Indexes:
+#       - IndexName: id-index
+#         # RCU: 50
+#         KeySchema:
+#           - Name: id
+#             Type: HASH

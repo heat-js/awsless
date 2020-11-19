@@ -1,6 +1,6 @@
 {
 	"name": "@heat/awsless",
-	"version": "0.0.15",
+	"version": "0.0.16",
 	"license": "MIT",
 	"bin": {
 		"awsless": "./awsless.js"
@@ -42,6 +42,7 @@
 		"rollup": "^2.33.3",
 		"rollup-plugin-coffee-script": "^2.0.0",
 		"rollup-plugin-terser": "^7.0.2",
+		"rollup-plugin-uglify": "^6.0.4",
 		"stream-to-buffer": "^0.1.0",
 		"tty-table": "^4.1.3",
 		"type-of": "^2.0.1"

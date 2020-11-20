@@ -1,6 +1,6 @@
 {
 	"name": "@heat/awsless",
-	"version": "0.0.45",
+	"version": "0.0.46",
 	"license": "MIT",
 	"bin": {
 		"awsless": "./awsless.js"
@@ -41,6 +41,7 @@
 		"ora": "^5.1.0",
 		"parse-domain": "^3.0.3",
 		"prompt-confirm": "^2.0.4",
+		"rimraf": "^3.0.2",
 		"rollup": "^2.33.3",
 		"rollup-plugin-coffee-script": "^2.0.0",
 		"rollup-plugin-terser": "^7.0.2",

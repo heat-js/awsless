@@ -17,7 +17,8 @@ export default resource (ctx) ->
 	# console.log ctx
 	# console.log ctx.array 'Tags', []
 	ctx.addResource ctx.name, {
-		Type: 'AWS::SQS::Queue'
+		Type:	'AWS::SQS::Queue'
+		Region:	ctx.string '#Region', ''
 		Properties: {
 			QueueName:				ctx.string 'Name'
 			MessageRetentionPeriod: ctx.number 'MessageRetentionPeriod', 1209600

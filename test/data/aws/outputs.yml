@@ -1,10 +1,10 @@
 
-# TestOutput:
-#   Type: Custom::Output
-#   Properties:
-#     Name: Test
-#     Description: 1-${env:test}-1
-#     Value: ${var:Config.Stack}
+TestOutput:
+  Type: Custom::Output
+  Properties:
+    Name: Test
+    Region: us-east-1
+    Value: ${var:Config.Stack}
 
 # Test2Output:
 #   Type: Custom::Output
@@ -21,5 +21,6 @@
 
 # Test:
 #   Type: Custom::Test
+#   Region: us-east-1
 #   Properties:
 #     Name: lolie

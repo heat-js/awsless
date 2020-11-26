@@ -2,7 +2,7 @@
 import sync				from '@heat/s3-deploy/sync'
 import path				from 'path'
 import resource 		from '../feature/resource'
-import isDirectory		from '../feature/is-directory'
+import isDirectory		from '../feature/fs/is-directory'
 import clearCache		from '../feature/cloudfront/clear-cache'
 import { task, keyval }	from '../feature/console'
 import fetchExports		from '../feature/fetch/exports'

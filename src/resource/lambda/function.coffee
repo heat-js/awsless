@@ -2,17 +2,43 @@
 import resource			from '../../feature/resource'
 import uploadLambda		from '../../feature/lambda/upload'
 import { Ref, GetAtt }	from '../../feature/cloudformation/fn'
+import removeDirectory	from '../../feature/fs/remove-directory'
 import path				from 'path'
 import cron				from './event/cron'
 import sns				from './event/sns'
 import sqs				from './event/sqs'
 import output			from '../output'
 
+# iamRole = (ctx, name, region, logging, warmer, events) ->
+# 	ctx.addResource "#{ ctx.name }IamRole", {
+# 		Type: 'AWS::IAM::Role'
+# 		Region: region
+# 		Properties: {
+# 			Path: '/'
+# 			RoleName: "#{ stack }-#{ region }-#{ name }-lambda-role"
+# 			AssumeRolePolicyDocument: {
+# 				Version: '2012-10-17'
+# 				Statement: [ {
+# 					Effect: 'Allow'
+# 					Principal: {
+# 						Service: [ 'lambda.amazonaws.com' ]
+# 					}
+# 					Action: [ 'sts:AssumeRole' ]
+# 				} ]
+# 			}
+# 			Policies: policies
+# 			ManagedPolicyArns: [
+
+# 			]
+# 			# ManagedPolicyArns: ctx.ref ''
+# 		}
+# 	}
+
 export default resource (ctx) ->
 
-	stack	= ctx.string '@Config.Stack'
-	region	= ctx.string '@Config.Region'
-	profile	= ctx.string '@Config.Profile'
+	stack	= ctx.string [ '#Stack',	'@Config.Stack' ]
+	region	= ctx.string [ '#Region',	'@Config.Region' ]
+	profile	= ctx.string [ '#Profile',	'@Config.Profile' ]
 
 	bucket	= ctx.string [ 'DeploymentBucket', '@Config.Lambda.DeploymentBucket' ]
 	name	= ctx.string 'Name'
@@ -36,7 +62,7 @@ export default resource (ctx) ->
 			Postfix:	'Warmer'
 			Rate:		'rate(5 minutes)'
 			Input:		{ warmer: true, concurrency: 3 }
-		}
+		}, { Region: region }
 
 	for event, index in events
 		event = { ...event, Postfix: String index }
@@ -44,6 +70,10 @@ export default resource (ctx) ->
 			when 'CRON' then cron ctx, ctx.name, event
 			when 'SNS'	then sns ctx, ctx.name, event
 			when 'SQS'	then sqs ctx, ctx.name, event
+
+	ctx.once 'cleanup', ->
+		dir = path.join process.cwd(), '.awsless', 'lambda'
+		await removeDirectory dir
 
 	ctx.on 'prepare-resource', ->
 		{ key, fileHash, zipHash, version } = await uploadLambda {
@@ -75,7 +105,7 @@ export default resource (ctx) ->
 					S3ObjectVersion:	version
 				}
 				FunctionName:	name
-				Handler:		path.basename handle
+				Handler:		"index#{ path.extname handle }"
 				Role:			GetAtt 'LambdaPolicyIamRole', 'Arn'
 				MemorySize:		ctx.number [ 'MemorySize', '@Config.Lambda.MemorySize' ], 128
 				Runtime:		ctx.string [ 'Runtime', '@Config.Lambda.Runtime' ], 'nodejs12.x'
@@ -93,128 +123,3 @@ export default resource (ctx) ->
 				]
 			}
 		}
-
-
-
-# export default class LambdaFunction extends Resource
-
-# 	linkSns: (index, event) -> {}
-# 	linkSqs: (index, event) -> {}
-# 	linkCron: (index, event) -> {
-# 		[ "#{ @name }_EventsRule_#{ index }" ]: {
-# 			Type: 'AWS::Events::Rule'
-# 			Properties: {
-# 				State: 'ENABLED'
-# 				ScheduleExpression: event.Rate
-# 				Targets: [
-# 					{
-# 						Id:		@name
-# 						Arn:	{ 'Fn::GetAtt': [ @name, 'Arn' ] }
-# 						Input:	JSON.stringify event.Input
-# 					}
-# 				]
-# 				...@tags()
-# 			}
-# 		}
-# 		[ "#{ @name }_LambdaPermission_#{ index }" ]: {
-# 			Type: 'AWS::Lambda::Permission'
-# 			Properties: {
-# 				FunctionName: { 'Fn::GetAtt': [ @name, 'Arn' ] }
-# 				Action:	'lambda:InvokeFunction'
-# 				Principal: 'events.amazonaws.com'
-# 				SourceArn: { 'Fn::GetAtt': [ "#{ @name }_EventsRule_#{ index }", 'Arn' ] }
-# 			}
-# 		}
-# 	}
-
-# 	warmer: ->
-# 		concurrency = @number 'Warmer', 0
-# 		if not concurrency
-# 			return {}
-
-# 		return @linkCron 'Warmer', {
-# 			Rate: 'rate(5 minutes)'
-# 			Input: { warmer: true, concurrency }
-# 		}
-
-# 	events: ->
-# 		resources = {}
-# 		for event, index in @props.Events
-# 			resources = {
-# 				...resources
-# 				...( switch event.Type
-# 					when 'SNS'	then @linkSns index, event
-# 					when 'SQS'	then @linkSqs index, event
-# 					when 'CRON'	then @linkCron index, event
-# 				)
-# 			}
-
-# 		return resources
-
-# 	environmentVariables: -> {
-# 		...( @vars.Lambda?.EnvironmentVariables or {} )
-# 		...( @props.EnvironmentVariables or {} )
-# 	}
-
-# 	LogGroup: ->
-# 		if not @boolean 'Logging', false
-# 			return {}
-
-# 		return {
-# 			[ "#{ @name }_LogGroup" ]: {
-# 				Type: "AWS::Logs::LogGroup",
-# 				Properties: {
-# 					LogGroupName:		"/aws/lambda/#{ @props.Name }",
-# 					RetentionInDays:	14
-# 				}
-# 			}
-# 		}
-
-# 	resources: -> {
-# 		[ @name ]: {
-# 			Type: 'AWS::Lambda::Function'
-# 			Properties: {
-# 				Code: {
-# 					S3Bucket:	@string 'DeploymentBucket', 'deployments.${var:profile}.${var:region}'
-# 					S3Key:		'serverless/wheel/prod/1605198388359-2020-11-12T16:26:28.359Z/spin.zip'
-# 				}
-# 				FunctionName:	@props.Name
-# 				Handler:		@props.Handler
-# 				MemorySize:		@number 'MemorySize', 128
-# 				Role:			{ 'Fn::GetAtt': [ 'IamRoleLambdaExecution', 'Arn' ] }
-# 				Runtime:		@string 'Runtime', 'nodejs12.x'
-# 				Timeout:		@number 'Timeout', 30
-# 				Environment:	{ Variables: @environmentVariables() }
-
-# 				...@tags { FunctionName: @props.Name }
-# 			}
-# 		}
-# 		[ "#{ @name }_LambdaVersion_#{ Date.now() }" ]: {
-# 			Type: 'AWS::Lambda::Version'
-# 			DeletionPolicy: 'Retain'
-# 			Properties: {
-# 				FunctionName:	{ Ref: @name }
-# 				CodeSha256:		@hash
-# 			}
-# 		}
-# 		@events()
-# 		@warmer()
-# 		@LogGroup()
-# 	}
-
-# 	outputs: -> {
-# 		[ "#{ @name }_Arn" ]: {
-# 			Description: 'The Arn of the Lambda Function'
-# 			Value: { 'Fn::GetAtt': [ @name, 'Arn' ] }
-# 			Export: {
-#       			Name: "#{ @vars.name }-#{ @name }-Arn"
-# 			}
-# 		}
-# 		[ "#{ @name }_ArnVersioned" ]: {
-# 			Description: 'The Versioned Arn of the Lambda Function'
-# 			Value: { Ref: @name ] }
-# 			Export: {
-#       			Name: "#{ @vars.name }-#{ @name }-ArnVersioned"
-# 			}
-# 		}
-# 	}

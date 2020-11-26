@@ -13,6 +13,8 @@ export default class Emitter
 		list.push callback
 
 	once: (key, eventName, callback) ->
+		key = "#{ key }-#{ eventName }"
+
 		if @keys.includes key
 			return
 
@@ -26,3 +28,11 @@ export default class Emitter
 
 		for callback in list
 			await callback.apply null, props
+
+	emitParallel: (eventName, ...props) ->
+		list = @events[ eventName ]
+		if not list
+			return
+
+		return Promise.all list.map (callback) ->
+			return callback.apply null, props

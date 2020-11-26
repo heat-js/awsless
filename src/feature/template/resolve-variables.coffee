@@ -2,29 +2,30 @@
 # makeRegex = ->
 # 	return /\$\{ *([a-z]+)\:([a-z0-9-_/\.:]+) *\}/gmi
 
+variablesItem = (variables, key, value, object) ->
+	switch typeof value
+		when 'string'
+			regex = /\$\{ *([a-z]+)\:([a-z0-9-_/\.:]+) *\}/gmi
+			while matches = regex.exec value
+				variables.push {
+					key
+					object
+					match:		matches[0]
+					type:		matches[1]
+					path:		matches[2]
+				}
+
+		when 'object', 'array'
+			findVariables variables, value
+
 findVariables = (variables, object) ->
-	if typeof object isnt 'object'
-		return
-
-	for key, value of object
-		switch typeof value
-			when 'string'
-				regex = /\$\{ *([a-z]+)\:([a-z0-9-_/\.:]+) *\}/gmi
-				while matches = regex.exec value
-					variables.push {
-						key
-						object
-						match:		matches[0]
-						type:		matches[1]
-						path:		matches[2]
-					}
-
-			when 'object'
-				findVariables variables, value
-
-			when 'array'
-				for item in value
-					findVariables variables, item
+	switch typeof object
+		when 'array'
+			for value, key in object
+				variablesItem variables, key, value, object
+		when 'object'
+			for key, value of object
+				variablesItem variables, key, value, object
 
 condenseReplacements = (replacements) ->
 	limit = 10
@@ -70,6 +71,8 @@ export default (template, variableResolvers = {}) ->
 	replacements = await getVariableReplacements variableResolvers, variables, template
 	replacements = condenseReplacements replacements
 
+	errors = []
+
 	for entry, index in variables
 		value		= entry.object[ entry.key ]
 		replacement = replacements[ entry.match ]
@@ -77,5 +80,10 @@ export default (template, variableResolvers = {}) ->
 		if typeof replacement isnt 'undefined'
 			value = value.replace entry.match, replacement
 			entry.object[ entry.key ] = value
+		else
+			errors.push entry.match
+
+	if errors.length
+		throw new Error "Unable to resolve variables: #{ errors.join ', ' }"
 
 	return template

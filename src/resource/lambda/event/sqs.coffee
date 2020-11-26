@@ -4,6 +4,7 @@ import { GetAtt, Sub, isFn, isArn }	from '../../../feature/cloudformation/fn'
 
 export default resource (ctx) ->
 
+	Region	= ctx.string '#Region', ''
 	postfix = ctx.string 'Postfix'
 	queue	= ctx.string 'Queue'
 
@@ -12,6 +13,7 @@ export default resource (ctx) ->
 
 	ctx.addResource "#{ ctx.name }SqsEventSourceMapping#{ postfix }", {
 		Type: 'AWS::Lambda::EventSourceMapping'
+		Region
 		Properties: {
 			FunctionName:	GetAtt ctx.name, 'Arn'
 			Enabled:		true

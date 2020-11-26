@@ -3,8 +3,8 @@ import toBuffer	from 'stream-to-buffer'
 import crypto 	from 'crypto'
 import fs 		from 'fs'
 
-export default (file, encoding) ->
-	hash = crypto.createHash 'sha256'
+export default (alg, file, encoding) ->
+	hash = crypto.createHash alg
 
 	stream = fs.createReadStream file
 		.pipe hash

@@ -16,8 +16,6 @@ export default cache ({ profile, region }) ->
 		result = await cloudFormation.listExports params
 			.promise()
 
-		# console.log result, profile, region
-
 		for item in result.Exports
 			list[ item.Name ] = item.Value
 

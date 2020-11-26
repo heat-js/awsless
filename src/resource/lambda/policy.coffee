@@ -11,14 +11,14 @@ logPolicy = (ctx) ->
 
 	for item in functions
 		name = objectPath {
-			resource:	item.Properties
+			properties:	item.Properties
 			paths:		'Name'
 			type:		'string'
 		}
 
 		logging = objectPath {
 			template:		ctx.template
-			resource:		item.Properties
+			properties:		item.Properties
 			paths:			[ 'Logging', '@Config.Lambda.Logging' ]
 			type:			'boolean'
 			defaultValue:	false
@@ -67,14 +67,14 @@ warmerPolicy = (ctx) ->
 		.filter (item) ->
 			return objectPath {
 				template:		ctx.template
-				resource:		item.Properties
+				properties:		item.Properties
 				paths:			[ 'Warmer', '@Config.Lambda.Warmer' ]
 				type:			'boolean'
 				defaultValue:	false
 			}
 		.map (item) ->
 			name = objectPath {
-				resource:	item.Properties
+				properties:	item.Properties
 				paths:		'Name'
 				type:		'string'
 			}
@@ -102,7 +102,7 @@ sqsPolicy = (ctx) ->
 	queues = ctx.find 'Custom::Lambda::Function'
 		.map (item) ->
 			return objectPath {
-				resource:		item.Properties
+				properties:		item.Properties
 				paths:			'Events'
 				type:			'array'
 				defaultValue:	[]
@@ -146,7 +146,7 @@ export default resource (ctx) ->
 
 	ctx.once 'prepare-resource', ->
 		stack	= ctx.string '@Config.Stack'
-		region	= ctx.string '@Config.Region'
+		Region	= ctx.string [ '#Region', '@Config.Region' ]
 
 		policies = [
 			...logPolicy ctx
@@ -160,9 +160,10 @@ export default resource (ctx) ->
 
 		ctx.addResource "LambdaPolicyIamRole", {
 			Type: 'AWS::IAM::Role'
+			Region
 			Properties: {
 				Path: '/'
-				RoleName: "#{ stack }-#{ region }-lambda-role"
+				RoleName: "#{ stack }-#{ Region }-lambda-role"
 				AssumeRolePolicyDocument: {
 					Version: '2012-10-17'
 					Statement: [ {

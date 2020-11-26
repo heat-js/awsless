@@ -4,10 +4,12 @@ import { GetAtt }	from '../../../feature/cloudformation/fn'
 
 export default resource (ctx) ->
 
+	Region	= ctx.string '#Region', ''
 	postfix = ctx.string 'Postfix'
 
 	ctx.addResource "#{ ctx.name }EventsRule#{ postfix }", {
 		Type: 'AWS::Events::Rule'
+		Region
 		Properties: {
 			State: 'ENABLED'
 			ScheduleExpression: ctx.string 'Rate'
@@ -23,6 +25,7 @@ export default resource (ctx) ->
 
 	ctx.addResource "#{ ctx.name }CronLambdaPermission#{ postfix }", {
 		Type: 'AWS::Lambda::Permission'
+		Region
 		Properties: {
 			FunctionName: GetAtt ctx.name, 'Arn'
 			Action:	'lambda:InvokeFunction'

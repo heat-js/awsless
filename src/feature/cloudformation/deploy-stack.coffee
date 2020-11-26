@@ -8,8 +8,9 @@ findFirstErrorInStackEvents = (events) ->
 
 	for event in events
 		currentEvents.unshift event
-		if event.ResourceStatus is 'UPDATE_IN_PROGRESS'
-			break
+		switch event.ResourceStatus
+			when 'UPDATE_IN_PROGRESS', 'CREATE_IN_PROGRESS'
+				break
 
 	for event in currentEvents
 		if event.ResourceStatus.includes 'FAILED'

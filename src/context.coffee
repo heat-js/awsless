@@ -7,7 +7,8 @@ export default class Context
 
 	constructor: ({
 		@name
-		@resource
+		@resource	= {}
+		@properties	= {}
 		@template	= {}
 		@outputs	= {}
 		@resources	= {}
@@ -45,7 +46,7 @@ export default class Context
 		ref = @refs[ key ]
 		ref.setValue value
 
-	copy: (name, resource) ->
+	copy: (name, resource, properties) ->
 		return new Context {
 			@resources
 			@template
@@ -53,6 +54,7 @@ export default class Context
 			@emitter
 			name
 			resource
+			properties
 		}
 
 	once: (event, callback) ->
@@ -72,6 +74,7 @@ export default class Context
 		return objectPath {
 			@template
 			@resource
+			@properties
 			type
 			paths
 			defaultValue

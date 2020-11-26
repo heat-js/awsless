@@ -16,17 +16,10 @@ export default (template, customResources = {}) ->
 				context
 				name
 				resource.Properties or {}
+				resource
 			)
 
 		else if 0 is type.indexOf 'AWS::'
 			context.addResource name, resource
 
-	return {
-		context
-		template: {
-			AWSTemplateFormatVersion: '2010-09-09'
-			Description:	"The AWS CloudFormation template for this Serverless application"
-			Resources:		context.getResources()
-			Outputs:		context.getOutputs()
-		}
-	}
+	return context

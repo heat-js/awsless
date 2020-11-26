@@ -4,6 +4,7 @@ import { GetAtt, Sub, isFn, isArn }	from '../../../feature/cloudformation/fn'
 
 export default resource (ctx) ->
 
+	Region	= ctx.string '#Region', ''
 	postfix = ctx.string 'Postfix'
 	topic	= ctx.string 'Topic'
 
@@ -12,6 +13,7 @@ export default resource (ctx) ->
 
 	ctx.addResource "#{ ctx.name }SnsSubscription#{ postfix }", {
 		Type: 'AWS::SNS::Subscription'
+		Region
 		Properties: {
 			TopicArn: topic
 			Protocol: 'lambda'
@@ -21,6 +23,7 @@ export default resource (ctx) ->
 
 	ctx.addResource "#{ ctx.name }SnsLambdaPermission#{ postfix }", {
 		Type: 'AWS::Lambda::Permission'
+		Region
 		Properties: {
 			FunctionName: GetAtt ctx.name, 'Arn'
 			Action:	'lambda:InvokeFunction'

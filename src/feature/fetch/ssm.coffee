@@ -11,13 +11,17 @@ formatPaths = (paths) ->
 		return "/#{ path }"
 
 export default cache ({ paths, profile, region }) ->
-	result = await store.getParameters formatPaths(paths), {
+	formattedPaths = formatPaths paths
+	result = await store.getParameters formattedPaths, {
 		credentials: new AWS.SharedIniFileCredentials { profile }
 		region
 	}
 
 	parameters = {}
-	for item, index in result.Parameters
-		parameters[ paths[index] ] = item.Value
+	for formattedPath, index in formattedPaths
+		parameter = result.Parameters.find (item) ->
+			return item.Name is formattedPath
+
+		parameters[ paths[index] ] = parameter.Value
 
 	return parameters

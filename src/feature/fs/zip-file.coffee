@@ -8,7 +8,13 @@ export default (input, fileName, output) ->
 
 	zip = new JSZip
 	zip.file fileName, fs.createReadStream input
-	source = zip.generateNodeStream { streamFiles:true }
+	source = zip.generateNodeStream {
+		streamFiles:true
+		compression: 'DEFLATE'
+		compressionOptions: {
+			level: 9
+		}
+	}
 
 	length 			= 0
 	lengthStream	= LengthStream (result) -> length = result

@@ -3,7 +3,7 @@ import typeOf 		from 'type-of'
 import objectPath 	from 'object-path'
 import { isFn }		from './cloudformation/fn'
 
-export default ({ template, resource, paths, type, defaultValue }) ->
+export default ({ template, resource, properties, paths, type, defaultValue }) ->
 	if not Array.isArray paths
 		paths = [ paths ]
 
@@ -11,8 +11,11 @@ export default ({ template, resource, paths, type, defaultValue }) ->
 		if path[0] is '@'
 			path = path.substr 1
 			object = template
-		else
+		else if path[0] is '#'
+			path = path.substr 1
 			object = resource
+		else
+			object = properties
 
 		value		= objectPath.get object, path
 		valueType	= typeOf value

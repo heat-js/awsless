@@ -1,169 +1,85 @@
 
 
-import resource				from '../../feature/resource'
-import { Sub, isFn, isArn }	from '../../feature/cloudformation/fn'
-import objectPath			from '../../feature/object-path'
+import resource	from '../../feature/resource'
 
-logPolicy = (ctx) ->
-	functions	= ctx.find 'Custom::Lambda::Function'
-	createLogs	= []
-	putLogs		= []
+export addPolicy = (ctx, name, statements) ->
+	policies = ctx.singleton 'lambda-policies', {}
+	policies[name] = [
+		...( policies[name] or [] )
+		...toArray statements
+	]
 
-	for item in functions
-		name = objectPath {
-			properties:	item.Properties
-			paths:		'Name'
-			type:		'string'
-		}
+uniqueArray = (array) ->
+	array = array.map (item)->
+		return JSON.stringify item
 
-		logging = objectPath {
-			template:		ctx.template
-			properties:		item.Properties
-			paths:			[ 'Logging', '@Config.Lambda.Logging' ]
-			type:			'boolean'
-			defaultValue:	false
-		}
+	return [ ...new Set array ].map (item) ->
+		return JSON.parse item
 
-		if logging
-			arn = "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/#{ name }"
-			createLogs.push Sub "#{ arn }:*"
-			putLogs.push	Sub "#{ arn }:*:*"
+toArray = (array) ->
+	if Array.isArray array
+		return array
 
-	if not createLogs.length
-		return []
+	return [ array ]
 
-	return [ {
-		PolicyName: "logging-lambda"
-		PolicyDocument: {
-			Version: '2012-10-17'
-			Statement: [
-				{
-					Effect: 'Allow'
-					Action: [ 'logs:CreateLogStream', 'logs:CreateLogGroup' ]
-					Resource: createLogs
-				}
-				{
-					Effect: 'Allow'
-					Action: [ 'logs:PutLogEvents' ]
-					Resource: putLogs
-				}
-			]
-		}
-	} ]
+statementKey = (statement) ->
+	return [
+		...toArray statement.Effect
+		...toArray statement.Action
+	].sort().join '-'
 
-customPolicies = (ctx) ->
-	return ctx
-		.find 'Custom::Lambda::Policy'
-		.map (item) -> {
-			PolicyName: "#{ item.Name }-lambda"
-			PolicyDocument: {
-				Version:	item.Version or '2012-10-17'
-				Statement:	item.Properties
+condenseStatements = (statements) ->
+	list = {}
+	for statement in statements
+		key = statementKey statement
+		entry = list[ key ]
+		if not entry
+			list[ key ] = {
+				Effect:		statement.Effect
+				Action:		statement.Action
+				Resource:	toArray statement.Resource
 			}
-		}
-
-warmerPolicy = (ctx) ->
-	rules = ctx.find 'Custom::Lambda::Function'
-		.filter (item) ->
-			return objectPath {
-				template:		ctx.template
-				properties:		item.Properties
-				paths:			[ 'Warmer', '@Config.Lambda.Warmer' ]
-				type:			'boolean'
-				defaultValue:	false
-			}
-		.map (item) ->
-			name = objectPath {
-				properties:	item.Properties
-				paths:		'Name'
-				type:		'string'
+		else
+			Object.assign entry, {
+				Resource: [
+					...entry.Resource
+					...toArray statement.Resource
+				]
 			}
 
-			return Sub "arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:/aws/lambda/#{ name }"
-
-	if rules.length is 0
-		return []
-
-	return [ {
-		PolicyName: "warmer-lambda"
-		PolicyDocument: {
-			Version: '2012-10-17'
-			Statement: [
-				{
-					Effect: 'Allow'
-					Action: [ 'lambda:InvokeFunction' ]
-					Resource: rules
-				}
-			]
-		}
-	} ]
-
-sqsPolicy = (ctx) ->
-	queues = ctx.find 'Custom::Lambda::Function'
-		.map (item) ->
-			return objectPath {
-				properties:		item.Properties
-				paths:			'Events'
-				type:			'array'
-				defaultValue:	[]
-			}
-
-		.flat()
-		.filter (item) ->
-			return item.Type is 'SQS'
-
-		.map (item) ->
-			return item.Queue
-
-		.map (queue) ->
-			if not isFn(queue) and not isArn(queue)
-				return Sub "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:#{ queue }"
-
-			return queue
-
-	if queues.length is 0
-		return []
-
-	return [ {
-		PolicyName: "sqs-events-lambda"
-		PolicyDocument: {
-			Version: '2012-10-17'
-			Statement: [
-				{
-					Effect: 'Allow'
-					Action: [
-						'sqs:ReceiveMessage'
-						'sqs:DeleteMessage'
-						'sqs:GetQueueAttributes'
-					]
-					Resource: queues
-				}
-			]
-		}
-	} ]
+	return Object.values(list).map (entry) ->
+		return { ...entry, Resource: uniqueArray entry.Resource }
 
 export default resource (ctx) ->
 
-	ctx.once 'prepare-resource', ->
-		stack	= ctx.string '@Config.Stack'
-		Region	= ctx.string [ '#Region', '@Config.Region' ]
+	addPolicy ctx, ctx.name, ctx.any '#Properties'
 
-		policies = [
-			...logPolicy ctx
-			...warmerPolicy ctx
-			...customPolicies ctx
-			...sqsPolicy ctx
-		]
+	ctx.once 'before-stringify-template', ->
 
-		if policies.length is 0
+		list = ctx.singleton 'lambda-policies', {}
+
+		if not Object.keys(list).length
 			return
+
+		policies = []
+		for PolicyName, Statement of list
+			policies.push {
+				PolicyName
+				PolicyDocument: {
+					Version: '2012-10-17'
+					Statement: condenseStatements Statement
+				}
+			}
+
+		Stack	= ctx.string '@Config.Stack'
+		Region	= ctx.string '@Config.Region'
 
 		ctx.addResource "LambdaPolicyIamRole", {
 			Type: 'AWS::IAM::Role'
 			Region
 			Properties: {
 				Path: '/'
-				RoleName: "#{ stack }-#{ Region }-lambda-role"
+				RoleName: "#{ Stack }-#{ Region }-lambda-role"
 				AssumeRolePolicyDocument: {
 					Version: '2012-10-17'
 					Statement: [ {

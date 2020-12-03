@@ -1,51 +1,32 @@
 
-import resource			from '../../feature/resource'
-import uploadLambda		from '../../feature/lambda/upload'
-import { Ref, GetAtt }	from '../../feature/cloudformation/fn'
-import removeDirectory	from '../../feature/fs/remove-directory'
-import path				from 'path'
-import cron				from './event/cron'
-import sns				from './event/sns'
-import sqs				from './event/sqs'
-import output			from '../output'
-
-# iamRole = (ctx, name, region, logging, warmer, events) ->
-# 	ctx.addResource "#{ ctx.name }IamRole", {
-# 		Type: 'AWS::IAM::Role'
-# 		Region: region
-# 		Properties: {
-# 			Path: '/'
-# 			RoleName: "#{ stack }-#{ region }-#{ name }-lambda-role"
-# 			AssumeRolePolicyDocument: {
-# 				Version: '2012-10-17'
-# 				Statement: [ {
-# 					Effect: 'Allow'
-# 					Principal: {
-# 						Service: [ 'lambda.amazonaws.com' ]
-# 					}
-# 					Action: [ 'sts:AssumeRole' ]
-# 				} ]
-# 			}
-# 			Policies: policies
-# 			ManagedPolicyArns: [
-
-# 			]
-# 			# ManagedPolicyArns: ctx.ref ''
-# 		}
-# 	}
+import resource				from '../../feature/resource'
+import uploadLambda			from '../../feature/lambda/upload'
+import { Ref, GetAtt, Sub }	from '../../feature/cloudformation/fn'
+import removeDirectory		from '../../feature/fs/remove-directory'
+import path					from 'path'
+import cron					from './event/cron'
+import sns					from './event/sns'
+import sqs					from './event/sqs'
+import eventInvokeConfig	from './event-invoke-config'
+import output				from '../output'
+import { addPolicy }		from './policy'
 
 export default resource (ctx) ->
 
-	stack	= ctx.string [ '#Stack',	'@Config.Stack' ]
-	region	= ctx.string [ '#Region',	'@Config.Region' ]
-	profile	= ctx.string [ '#Profile',	'@Config.Profile' ]
+	stack		= ctx.string [ '#Stack',	'@Config.Stack' ]
+	region		= ctx.string [ '#Region',	'@Config.Region' ]
+	profile		= ctx.string [ '#Profile',	'@Config.Profile' ]
 
-	bucket	= ctx.string [ 'DeploymentBucket', '@Config.Lambda.DeploymentBucket' ]
-	name	= ctx.string 'Name'
-	handle	= ctx.string 'Handle'
-	logging	= ctx.boolean [ 'Logging', '@Config.Lambda.Logging' ], false
-	warmer	= ctx.boolean [ 'Warmer', '@Config.Lambda.Warmer' ], false
-	events	= ctx.array 'Events', []
+	bucket		= ctx.string [ 'DeploymentBucket', '@Config.Lambda.DeploymentBucket' ]
+	name		= ctx.string [ 'Name', 'FunctionName' ]
+	handle		= ctx.string 'Handle'
+	layers		= ctx.array [ 'Layers', '@Config.Lambda.Layers' ], []
+	logging		= ctx.boolean [ 'Logging', '@Config.Lambda.Logging' ], false
+	warmer		= ctx.boolean [ 'Warmer', '@Config.Lambda.Warmer' ], false
+	events		= ctx.array 'Events', []
+	externals	= ctx.array [ 'Externals',	'@Config.Lambda.Externals' ], []
+	files		= ctx.object [ 'Files',		'@Config.Lambda.Files' ], {}
+	asyncConfig	= ctx.object 'Async', {}
 
 	if logging
 		ctx.addResource "#{ ctx.name }LogGroup", {
@@ -57,12 +38,32 @@ export default resource (ctx) ->
 			}
 		}
 
+		logsARN = "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/#{ name }"
+		addPolicy ctx, 'lambda-logging', [
+			{
+				Effect: 'Allow'
+				Action: [ 'logs:CreateLogStream', 'logs:CreateLogGroup' ]
+				Resource: Sub "#{ logsARN }:*"
+			}
+			{
+				Effect: 'Allow'
+				Action: 'logs:PutLogEvents'
+				Resource: Sub "#{ logsARN }:*:*"
+			}
+		]
+
 	if warmer
 		cron ctx, ctx.name, {
 			Postfix:	'Warmer'
 			Rate:		'rate(5 minutes)'
 			Input:		{ warmer: true, concurrency: 3 }
 		}, { Region: region }
+
+		addPolicy ctx, 'lambda-warmer', {
+			Effect:		'Allow'
+			Action:		'lambda:InvokeFunction'
+			Resource:	Sub "arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:/aws/lambda/#{ name }"
+		}
 
 	for event, index in events
 		event = { ...event, Postfix: String index }
@@ -76,22 +77,24 @@ export default resource (ctx) ->
 		await removeDirectory dir
 
 	ctx.on 'prepare-resource', ->
-		{ key, fileHash, zipHash, version } = await uploadLambda {
+		{ key, checksum, hash, version } = await uploadLambda {
 			stack
 			profile
 			region
 			bucket
 			handle
 			name
+			externals
+			files
 		}
 
-		ctx.addResource "#{ ctx.name }Version#{ fileHash }", {
+		ctx.addResource "#{ ctx.name }Version#{ checksum }", {
 			Type: 'AWS::Lambda::Version'
 			Region: region
 			DeletionPolicy: 'Retain'
 			Properties: {
 				FunctionName:	Ref ctx.name
-				CodeSha256:		zipHash
+				CodeSha256:		hash
 			}
 		}
 
@@ -110,8 +113,12 @@ export default resource (ctx) ->
 				MemorySize:		ctx.number [ 'MemorySize', '@Config.Lambda.MemorySize' ], 128
 				Runtime:		ctx.string [ 'Runtime', '@Config.Lambda.Runtime' ], 'nodejs12.x'
 				Timeout:		ctx.number [ 'Timeout', '@Config.Lambda.Timeout' ], 30
+				Layers:			layers
+
 				Environment: {
 					Variables: {
+						AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+						AWS_ACCOUNT_ID:	Ref 'AWS::AccountId'
 						...ctx.object '@Config.Lambda.Env', {}
 						...ctx.object 'Env', {}
 					}
@@ -123,3 +130,14 @@ export default resource (ctx) ->
 				]
 			}
 		}
+
+		if Object.keys(asyncConfig).length
+			eventInvokeConfig(
+				ctx
+				"#{ ctx.name }AsyncConfig"
+				{
+					...asyncConfig
+					Name: Ref ctx.name
+				}
+				{ Region: region }
+			)

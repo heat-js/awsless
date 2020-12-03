@@ -1,11 +1,11 @@
 
 import Client from '../client/cloudformation'
 
-export default ({ profile, region, stackName }) ->
+export default ({ profile, region, stack }) ->
 	cloudFormation = Client { profile, region }
 
 	try
-		result = await cloudFormation.describeStacks { StackName: stackName }
+		result = await cloudFormation.describeStacks { StackName: stack }
 			.promise()
 	catch error
 		if error.code is 'ValidationError' and error.message.includes 'does not exist'

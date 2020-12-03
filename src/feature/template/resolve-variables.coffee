@@ -2,30 +2,29 @@
 # makeRegex = ->
 # 	return /\$\{ *([a-z]+)\:([a-z0-9-_/\.:]+) *\}/gmi
 
-variablesItem = (variables, key, value, object) ->
+variablesItem = (variableResolvers, variables, key, value, object) ->
 	switch typeof value
 		when 'string'
 			regex = /\$\{ *([a-z]+)\:([a-z0-9-_/\.:]+) *\}/gmi
 			while matches = regex.exec value
-				variables.push {
-					key
-					object
-					match:		matches[0]
-					type:		matches[1]
-					path:		matches[2]
-				}
+				[ match, type, path ] = matches
+
+				if not variableResolvers[type]
+					continue
+
+				variables.push { key, object, match, type, path }
 
 		when 'object', 'array'
-			findVariables variables, value
+			findVariables variableResolvers, variables, value
 
-findVariables = (variables, object) ->
+findVariables = (variableResolvers, variables, object) ->
 	switch typeof object
 		when 'array'
 			for value, key in object
-				variablesItem variables, key, value, object
+				variablesItem variableResolvers, variables, key, value, object
 		when 'object'
 			for key, value of object
-				variablesItem variables, key, value, object
+				variablesItem variableResolvers, variables, key, value, object
 
 condenseReplacements = (replacements) ->
 	limit = 10
@@ -66,7 +65,7 @@ getVariableReplacements = (variableResolvers, variables, template) ->
 export default (template, variableResolvers = {}) ->
 	template = JSON.parse JSON.stringify template
 	variables = []
-	findVariables variables, template
+	findVariables variableResolvers, variables, template
 
 	replacements = await getVariableReplacements variableResolvers, variables, template
 	replacements = condenseReplacements replacements

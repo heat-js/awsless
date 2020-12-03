@@ -115,6 +115,31 @@ describe 'Resolve Variables', ->
 				four: 'foo'
 			}
 
+	# it 'should resolve structures', ->
+	# 	template = {
+	# 		var1: { prop: true }
+	# 		var2: { prop: '${var:var1}' }
+	# 		var3: '${var:var2}'
+	# 	}
+
+	# 	result = await resolveVariables template, resolvers
+	# 	expect result
+	# 		.toStrictEqual {
+	# 			var1: { prop: true }
+	# 			var2: { prop: { var1: { prop: true } } }
+	# 			var3: { prop: { var1: { prop: true } } }
+	# 		}
+
+	it 'should not resolve native aws variables', ->
+		template = {
+			AWS: '1'
+			var: '${AWS::Region}'
+		}
+
+		result = await resolveVariables template, resolvers
+		expect result
+			.toStrictEqual template
+
 	it 'should not resolve unknown resolvers or paths', ->
 		template = {
 			unknownPath: '${ var:abc }'

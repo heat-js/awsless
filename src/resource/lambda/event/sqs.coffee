@@ -1,6 +1,7 @@
 
 import resource						from '../../../feature/resource'
 import { GetAtt, Sub, isFn, isArn }	from '../../../feature/cloudformation/fn'
+import { addPolicy }				from '../policy'
 
 export default resource (ctx) ->
 
@@ -20,4 +21,14 @@ export default resource (ctx) ->
 			BatchSize:		ctx.number 'BatchSize', 1
 			EventSourceArn: queue
 		}
+	}
+
+	addPolicy ctx, 'lambda-events', {
+		Effect: 'Allow'
+		Action: [
+			'sqs:ReceiveMessage'
+			'sqs:DeleteMessage'
+			'sqs:GetQueueAttributes'
+		]
+		Resource: queue
 	}

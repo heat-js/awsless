@@ -42,7 +42,8 @@ export default (context) ->
 
 	return regions.map (region) ->
 		return {
-			name:	stack
+			name: stack
+			stack
 			region
 			profile
 			template: {

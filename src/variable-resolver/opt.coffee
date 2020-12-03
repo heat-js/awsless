@@ -1,7 +1,5 @@
 
-import minimist from 'minimist'
-
-opts = minimist process.argv.slice 2
+import opts	from '../feature/terminal/options'
 
 export default (options) ->
 	return options.map (option) =>

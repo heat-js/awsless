@@ -3,13 +3,14 @@
 import Client				from '../client/s3'
 import path					from 'path'
 import build				from './build'
-import hash 				from '../crypto/hash'
-import zip 					from '../fs/zip-file'
+import createHash 			from '../crypto/hash'
+import zip 					from '../fs/zip-files'
 import { createReadStream }	from 'fs'
 import { task, warn }		from '../console'
 import time					from '../performance/time'
 import filesize 			from 'filesize'
 import chalk				from 'chalk'
+import createChecksum		from 'hash-then'
 
 # build = (inputFile, outputFile, fast) ->
 # 	dir = path.join __dirname, './build'
@@ -37,7 +38,7 @@ getObject = ({ region, profile, bucket, key }) ->
 		version:	result.VersionId
 	}
 
-export default ({ profile, region, bucket, name, stack, handle }) ->
+export default ({ profile, region, bucket, name, stack, handle, externals = [], files = {} }) ->
 
 	root = process.cwd()
 
@@ -45,42 +46,58 @@ export default ({ profile, region, bucket, name, stack, handle }) ->
 	file = file.substr 0, file.lastIndexOf '.'
 	file = path.join root, file
 
-	outputPath = path.join root, '.awsless', 'lambda'
+	outputPath		= path.join root, '.awsless', 'lambda', name
+	uncompPath		= path.join outputPath, 'uncompressed'
+	compPath		= path.join outputPath, 'compressed'
 
+	uncompFile		= path.join uncompPath, 'index.js'
+	compFile		= path.join compPath,	'index.js'
+	uncompZipFile	= path.join uncompPath, 'index.zip'
+	zipFile 		= path.join compPath,	'index.zip'
+	key				= "#{ stack }/#{ name }.zip"
+	elapsed 		= time()
 
-	uncompFile	= path.join outputPath, "#{ name }.js"
-	compFile	= path.join outputPath, "#{ name }.compressed.js"
-	zipFile 	= path.join outputPath, "#{ name }.zip"
-	key			= "#{ stack }/#{ name }.zip"
-	elapsed 	= time()
-
-	{ fileHash, object } = await task(
+	{ checksum, object } = await task(
 		chalk"Checking Lambda: {yellow #{ name }.zip}"
 		{ persist: false }
 		(->
-			await build file, uncompFile, true
+			await build file, uncompFile, {
+				minimize: false
+				externals
+			}
 
-			fileHash 	= await hash 'sha1', uncompFile, 'hex'
-			fileHash	= fileHash.substr 0, 16
+			# size		= await zip uncompFile, "index.js", uncompZipFile, files
+			# size 		= await zip uncompPath, uncompZipFile, { minimize: false }
+			# fileHash 	= await hash 'sha1', uncompZipFile, 'hex'
+			# fileHash	= fileHash.substr 0, 16
+
+			checksum	= await createChecksum uncompPath
+			checksum 	= checksum.substr 0, 16
+
 			object		= await getObject { profile, region, bucket, key }
-			return { fileHash, object }
+
+			return { checksum, object }
 		)()
 	)
 
-	if object and object.metadata.filehash is fileHash
+	if object and object.metadata.checksum is checksum
 		warn chalk"{white Unchanged Lambda: {yellow #{ name }.zip} (build: {blue #{ elapsed() }})}"
-		return { key, fileHash, zipHash: object.metadata.ziphash, version: object.version }
+		return { key, checksum, hash: object.metadata.hash, version: object.version }
 
-	{ zipHash, size } = await task(
+	{ hash, size } = await task(
 		chalk"Building Lambda: {yellow #{ name }.zip}"
 		{ persist: false }
 		(->
-			await build file, compFile, false
+			await build file, compFile, {
+				minimize: true
+				externals
+			}
 
-			size		= await zip compFile, "index.js", zipFile
-			zipHash		= await hash 'sha256', zipFile, 'base64'
+			size 		= await zip compPath, zipFile
+			# size		= await zip compFile, "index.js", zipFile, files
+			hash		= await createHash 'sha256', zipFile, 'base64'
 
-			return { zipHash, size }
+			return { hash, size }
 		)()
 	)
 
@@ -113,8 +130,8 @@ export default ({ profile, region, bucket, name, stack, handle }) ->
 		Body:			createReadStream zipFile
 		StorageClass:	'STANDARD'
 		Metadata: {
-			filehash:	fileHash
-			ziphash:	zipHash
+			checksum
+			hash
 		}
 	}
 
@@ -124,4 +141,4 @@ export default ({ profile, region, bucket, name, stack, handle }) ->
 			.promise()
 	)
 
-	return { key, fileHash, zipHash, version: result.VersionId }
+	return { key, checksum, hash, version: result.VersionId }

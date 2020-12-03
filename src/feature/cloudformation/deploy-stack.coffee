@@ -2,39 +2,22 @@
 import Client 			from '../client/cloudformation'
 import { task, warn }	from '../console'
 import stackStatus 		from './stack-status'
+import stackEventsError from './stack-events-error'
 
-findFirstErrorInStackEvents = (events) ->
-	currentEvents = []
-
-	for event in events
-		currentEvents.unshift event
-		switch event.ResourceStatus
-			when 'UPDATE_IN_PROGRESS', 'CREATE_IN_PROGRESS'
-				break
-
-	for event in currentEvents
-		if event.ResourceStatus.includes 'FAILED'
-			return event.ResourceStatusReason
-
-	for event in events
-		if event.ResourceStatus.includes 'FAILED'
-			return event.ResourceStatusReason
-
-	return 'Unknown error'
-
-export default ({ profile, region, stackName, template, capabilities = [] }) ->
+export default ({ profile, region, stack, template, capabilities = [] }) ->
 
 	cloudFormation = Client { profile, region }
 
 	params = {
-		StackName: stackName
+		StackName: stack
 		TemplateBody: template
 		Capabilities: capabilities
-		Tags: [ { Key: 'Stack', Value: stackName } ]
+		Tags: [ { Key: 'Stack', Value: stack } ]
 	}
 
-	status = await stackStatus { profile, region, stackName }
-	if not status
+	status = await stackStatus { profile, region, stack }
+	exists = !!status
+	if not exists
 		result = await cloudFormation.createStack {
 			...params
 			EnableTerminationProtection: false
@@ -51,6 +34,7 @@ export default ({ profile, region, stackName, template, capabilities = [] }) ->
 				...params
 			}
 			.promise()
+
 		catch error
 			if error.message.includes 'No updates are to be performed'
 				warn 'Nothing to deploy!'
@@ -58,17 +42,17 @@ export default ({ profile, region, stackName, template, capabilities = [] }) ->
 
 			throw error
 
-	state = if status then 'stackUpdateComplete' else 'stackCreateComplete'
+	state = if exists then 'stackUpdateComplete' else 'stackCreateComplete'
 
 	try
-		await cloudFormation.waitFor state, { StackName: stackName }
+		await cloudFormation.waitFor state, { StackName: stack }
 			.promise()
 
 	catch error
 		if error.stack
-			result = await cloudFormation.describeStackEvents { StackName: stackName }
+			result = await cloudFormation.describeStackEvents { StackName: stack }
 				.promise()
 
-			throw new Error findFirstErrorInStackEvents result.StackEvents
+			throw new Error stackEventsError result.StackEvents
 
 		throw error

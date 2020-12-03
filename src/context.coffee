@@ -7,6 +7,7 @@ export default class Context
 
 	constructor: ({
 		@name
+		@singletons	= {}
 		@resource	= {}
 		@properties	= {}
 		@template	= {}
@@ -40,15 +41,19 @@ export default class Context
 		@outputs[name] = output
 
 	ref: (key) ->
-		return @refs[ key ] = new Reference
+		return @refs[ key ] or ( @refs[ key ] = new Reference )
 
 	value: (key, value) ->
 		ref = @refs[ key ]
 		ref.setValue value
 
+	singleton: (key, value) ->
+		return @singletons[ key ] or ( @singletons[ key ] = value )
+
 	copy: (name, resource, properties) ->
 		return new Context {
 			@resources
+			@singletons
 			@template
 			@outputs
 			@emitter

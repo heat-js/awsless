@@ -44,7 +44,10 @@ import TerserPlugin		from 'terser-webpack-plugin'
 import webpack			from 'webpack'
 import path				from 'path'
 
-options = {
+# import nodeLoader		from 'node-loader'
+# import coffeeLoader		from 'coffee-loader'
+
+webpackOptions = {
 	target: 'node'
 	context: process.cwd()
 	devtool: false
@@ -52,7 +55,7 @@ options = {
 		__dirname: false
 		__filename: false
 	}
-	externals: [ nodeExternals(), 'aws-sdk' ]
+	# externals: [ nodeExternals(), 'aws-sdk' ]
 	stats: 'minimal'
 	performance: {
 		# Turn off size warnings for entry points
@@ -61,8 +64,12 @@ options = {
 	module: {
 		rules: [
 			{
-				loader: 'coffee-loader'
+				loader: require.resolve 'coffee-loader'
 				test: /\.coffee$/
+			}
+			{
+				loader: require.resolve 'node-loader'
+				test: /\.node$/
 			}
 		]
 	}
@@ -71,14 +78,20 @@ options = {
 	}
 }
 
-export default (inputFile, outputFile, fast) ->
+export default (inputFile, outputFile, options) ->
+
+	options = {
+		minimize: true
+		externals: []
+		...options
+	}
 
 	return new Promise (resolve, reject) ->
-		compiler = webpack Object.assign {}, options, {
+		compiler = webpack Object.assign {}, webpackOptions, {
 			entry:	inputFile
-			mode:	if fast then 'development' else 'production'
+			mode:	if options.minimize then 'production' else 'development'
 			optimization: {
-				minimize: not fast
+				minimize: options.minimize
 				minimizer: [
 					new TerserPlugin {
 						parallel: true
@@ -90,6 +103,11 @@ export default (inputFile, outputFile, fast) ->
 					}
 				]
 			}
+			externals: [
+				nodeExternals()
+				'aws-sdk'
+				...options.externals
+			]
 			# optimization: {
 			# 	minimize: false
 			# }
@@ -108,9 +126,15 @@ export default (inputFile, outputFile, fast) ->
 			data = stats.toJson()
 			if data.errors.length
 				info = data.errors[0]
-				error = new Error info.message
+				error = new Error """
+					#{ info.message }
+					File: #{ info.moduleName }
+				"""
+
 				error.file		= info.moduleName
 				error.details	= info.details
+
+				# console.error data.errors
 
 				reject error
 				return

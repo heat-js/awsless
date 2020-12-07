@@ -50,10 +50,10 @@ export default resource (ctx) ->
 		Type: 'AWS::Route53::RecordSet'
 		Properties: {
 			HostedZoneName
-			Name: DomainName
+			Name: "#{ DomainName }."
 			Type: 'A'
 			AliasTarget: {
-				DNSName: DomainName
+				DNSName: GetAtt "#{ ctx.name }CloudFrontDistribution", 'DomainName'
 				HostedZoneId
 			}
 		}

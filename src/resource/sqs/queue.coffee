@@ -14,13 +14,14 @@ redrivePolicy = (ctx) ->
 	}
 
 export default resource (ctx) ->
-	# console.log ctx
-	# console.log ctx.array 'Tags', []
+
+	name = ctx.string [ 'Name', 'QueueName' ]
+
 	ctx.addResource ctx.name, {
 		Type:	'AWS::SQS::Queue'
 		Region:	ctx.string '#Region', ''
 		Properties: {
-			QueueName:				ctx.string 'Name'
+			QueueName:				name
 			MessageRetentionPeriod: ctx.number 'MessageRetentionPeriod', 1209600
 			VisibilityTimeout:		ctx.number 'VisibilityTimeout', 30
 
@@ -28,7 +29,7 @@ export default resource (ctx) ->
 
 			Tags: [
 				...ctx.array 'Tags', []
-				{ Key: 'QueueName', Value: ctx.string 'Name' }
+				{ Key: 'QueueName', Value: name }
 			]
 		}
 	}

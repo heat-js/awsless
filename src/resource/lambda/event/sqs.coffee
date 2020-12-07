@@ -18,8 +18,9 @@ export default resource (ctx) ->
 		Properties: {
 			FunctionName:	GetAtt ctx.name, 'Arn'
 			Enabled:		true
-			BatchSize:		ctx.number 'BatchSize', 1
+			BatchSize:		ctx.number 'BatchSize', 10
 			EventSourceArn: queue
+			# MaximumBatchingWindowInSeconds:	ctx.number [ 'MaximumBatchingWindowInSeconds' ], 10
 		}
 	}
 

@@ -62,6 +62,7 @@ webpackOptions = {
 		hints: false
 	}
 	module: {
+		strictExportPresence: true
 		rules: [
 			{
 				loader: require.resolve 'coffee-loader'
@@ -112,9 +113,10 @@ export default (inputFile, outputFile, options) ->
 			# 	minimize: false
 			# }
 			output: {
-				path:			path.dirname outputFile
-				filename:		path.basename outputFile
-				libraryTarget:	'commonjs'
+				path:							path.dirname outputFile
+				filename:						path.basename outputFile
+				libraryTarget:					'commonjs'
+				strictModuleExceptionHandling:	true
 			}
 		}
 

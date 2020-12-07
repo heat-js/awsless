@@ -7,6 +7,7 @@ import path					from 'path'
 import cron					from './event/cron'
 import sns					from './event/sns'
 import sqs					from './event/sqs'
+import dynamodb				from './event/dynamodb'
 import eventInvokeConfig	from './event-invoke-config'
 import output				from '../output'
 import { addPolicy }		from './policy'
@@ -62,15 +63,18 @@ export default resource (ctx) ->
 		addPolicy ctx, 'lambda-warmer', {
 			Effect:		'Allow'
 			Action:		'lambda:InvokeFunction'
-			Resource:	Sub "arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:/aws/lambda/#{ name }"
+			Resource:	Sub "arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:#{ name }"
 		}
 
 	for event, index in events
-		event = { ...event, Postfix: String index }
-		switch ctx.string "Events.#{ index }.Type"
-			when 'CRON' then cron ctx, ctx.name, event
-			when 'SNS'	then sns ctx, ctx.name, event
-			when 'SQS'	then sqs ctx, ctx.name, event
+		event	= { ...event, Postfix: String index }
+		type	= ctx.string "Events.#{ index }.Type"
+
+		switch type.toLowerCase()
+			when 'cron'		then cron ctx, ctx.name, event
+			when 'sns'		then sns ctx, ctx.name, event
+			when 'sqs'		then sqs ctx, ctx.name, event
+			when 'dynamodb'	then dynamodb ctx, ctx.name, event
 
 	ctx.once 'cleanup', ->
 		dir = path.join process.cwd(), '.awsless', 'lambda'

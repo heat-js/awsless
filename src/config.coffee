@@ -1,12 +1,13 @@
 
-import cf				from './variable-resolver/cf'
-import env				from './variable-resolver/env'
-import opt				from './variable-resolver/opt'
-import VAR				from './variable-resolver/var'
-import ssm				from './variable-resolver/ssm'
+import cf						from './variable-resolver/cf'
+import env						from './variable-resolver/env'
+import opt						from './variable-resolver/opt'
+import VAR						from './variable-resolver/var'
+import ssm						from './variable-resolver/ssm'
 
 import output					from './resource/output'
 import website					from './resource/website'
+import snsTopic					from './resource/sns/topic'
 import sqsQueue					from './resource/sqs/queue'
 import dynamoDBTable			from './resource/dynamodb/table'
 import lambdaFunction			from './resource/lambda/function'
@@ -28,6 +29,7 @@ export remoteResolvers = {
 export resources = {
 	'Awsless::Output':						output
 	'Awsless::Website':						website
+	'Awsless::SNS::Topic':					snsTopic
 	'Awsless::SQS::Queue':					sqsQueue
 	'Awsless::DynamoDB::Table':				dynamoDBTable
 	'Awsless::Lambda::Function':			lambdaFunction

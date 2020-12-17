@@ -1,13 +1,13 @@
 {
 	"name": "@heat/awsless",
-	"version": "0.0.221",
+	"version": "0.0.222",
 	"license": "MIT",
 	"bin": {
 		"awsless": "./awsless.js"
 	},
 	"scripts": {
 		"test": "./node_modules/.bin/jest",
-		"deploy": "./node_modules/.bin/coffee -t ./cli/deploy.coffee",
+		"demo": "./node_modules/.bin/coffee -t ./cli/demo.coffee",
 		"patch": "yarn version --patch; ./node_modules/.bin/ncp",
 		"minor": "yarn version --minor; ./node_modules/.bin/ncp",
 		"major": "yarn version --major; ./node_modules/.bin/ncp"
@@ -32,6 +32,7 @@
 		"boxen": "^4.2.0",
 		"coffee-loader": "^1.0.1",
 		"commander": "^7.0.0-1",
+		"draftlog": "^1.0.12",
 		"filesize": "^6.1.0",
 		"function-cache": "^1.0.5",
 		"get-all-files": "^3.0.0",

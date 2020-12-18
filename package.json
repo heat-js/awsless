@@ -1,6 +1,6 @@
 {
 	"name": "@heat/awsless",
-	"version": "0.0.227",
+	"version": "0.0.228",
 	"license": "MIT",
 	"bin": {
 		"awsless": "./awsless.js"
@@ -31,7 +31,7 @@
 		"aws-sdk": "^2.795.0",
 		"boxen": "^4.2.0",
 		"coffee-loader": "^1.0.1",
-		"commander": "^7.0.0-1",
+		"commander": "^6.2.1",
 		"draftlog": "^1.0.12",
 		"filesize": "^6.1.0",
 		"function-cache": "^1.0.5",

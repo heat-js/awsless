@@ -1,6 +1,6 @@
 {
 	"name": "@heat/awsless",
-	"version": "0.0.271",
+	"version": "0.0.272",
 	"license": "MIT",
 	"bin": {
 		"awsless": "./awsless.js"
@@ -57,7 +57,7 @@
 		"webpack-node-externals": "^2.5.2"
 	},
 	"devDependencies": {
-		"@heat/npm-coffee-publisher": "^0.1.6",
+		"@heat/npm-coffee-publisher": "^0.1.8",
 		"jest": "^24.8.0",
 		"jest-preset-coffeescript": "1.1.1"
 	}

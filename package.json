@@ -1,6 +1,6 @@
 {
 	"name": "@heat/awsless",
-	"version": "0.0.296",
+	"version": "0.0.297",
 	"license": "MIT",
 	"bin": {
 		"awsless": "./awsless.js"
@@ -39,6 +39,7 @@
 		"hash-then": "^1.1.1",
 		"jest-worker": "^26.6.2",
 		"js-yaml-cloudformation-schema": "^1.0.0",
+		"json-format": "^1.0.1",
 		"jszip": "^3.5.0",
 		"length-stream": "^0.1.1",
 		"mkdirp": "^1.0.4",

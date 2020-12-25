@@ -1,13 +1,7 @@
 
 
 import resource	from '../../feature/resource'
-
-export addPolicy = (ctx, name, statements) ->
-	policies = ctx.singleton 'lambda-policies', {}
-	policies[name] = [
-		...( policies[name] or [] )
-		...toArray statements
-	]
+import { isFn, isArn, Sub }	from '../../feature/cloudformation/fn'
 
 uniqueArray = (array) ->
 	array = array.map (item)->
@@ -50,27 +44,56 @@ condenseStatements = (statements) ->
 	return Object.values(list).map (entry) ->
 		return { ...entry, Resource: uniqueArray entry.Resource }
 
+export addManagedPolicy = (ctx, policy) ->
+	if not isFn(policy) and not isArn(policy)
+		policy = Sub "arn:${AWS::Partition}:iam::aws:policy/service-role/#{ policy }"
+
+	policies = ctx.singleton 'lambda-managed-policies', []
+	policies.push policy
+
+managedPolicyArns = (ctx) ->
+	policies = ctx.singleton 'lambda-managed-policies', []
+	policies = policies.map (policy) -> JSON.stringify policy
+	policies = [ ...new Set policies ]
+	policies = policies.map (policy) -> JSON.parse policy
+
+	if not policies.length
+		return { }
+
+	return {
+		ManagedPolicyArns: policies
+	}
+
+inlinePolicies = (ctx) ->
+	list = ctx.singleton 'lambda-policies', {}
+	if not Object.keys(list).length
+		return {}
+
+	policies = []
+	for PolicyName, Statement of list
+		policies.push {
+			PolicyName
+			PolicyDocument: {
+				Version: '2012-10-17'
+				Statement: condenseStatements Statement
+			}
+		}
+
+	return {
+		Policies: policies
+	}
+
 export default resource (ctx) ->
 
-	addPolicy ctx, ctx.name, ctx.any '#Properties'
+	statements = toArray ctx.any '#Properties', []
+	if statements.length
+		policies = ctx.singleton 'lambda-policies', {}
+		policies[ctx.name] = [
+			...( policies[ctx.name] or [] )
+			...statements
+		]
 
 	ctx.once 'before-stringify-template', ->
-
-		list = ctx.singleton 'lambda-policies', {}
-
-		if not Object.keys(list).length
-			return
-
-		policies = []
-		for PolicyName, Statement of list
-			policies.push {
-				PolicyName
-				PolicyDocument: {
-					Version: '2012-10-17'
-					Statement: condenseStatements Statement
-				}
-			}
-
 		Stack	= ctx.string '@Config.Stack'
 		Region	= ctx.string '@Config.Region'
 
@@ -90,6 +113,7 @@ export default resource (ctx) ->
 						Action: [ 'sts:AssumeRole' ]
 					} ]
 				}
-				Policies: policies
+				...inlinePolicies ctx
+				...managedPolicyArns ctx
 			}
 		}

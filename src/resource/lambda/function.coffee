@@ -3,14 +3,59 @@ import resource				from '../../feature/resource'
 import uploadLambda			from '../../feature/lambda/upload'
 import { Ref, GetAtt, Sub }	from '../../feature/cloudformation/fn'
 import removeDirectory		from '../../feature/fs/remove-directory'
+import objectPath 			from '../../feature/object-path'
 import path					from 'path'
 import cron					from './event/cron'
 import sns					from './event/sns'
 import sqs					from './event/sqs'
 import dynamodb				from './event/dynamodb'
+import elb					from './event/elb'
 import eventInvokeConfig	from './event-invoke-config'
 import output				from '../output'
-import { addPolicy }		from './policy'
+import addPolicy, { addManagedPolicy } from './policy'
+
+reservedConcurrentExecutions = (ctx) ->
+	reserved = ctx.number [
+		'Reserved'
+		'ReservedConcurrentExecutions'
+		'@Config.Lambda.Reserved'
+		'@Config.Lambda.ReservedConcurrentExecutions'
+	], 0
+
+	if reserved <= 0
+		return {}
+
+	return { ReservedConcurrentExecutions: reserved }
+
+vpcConfig = (ctx) ->
+	vpc = ctx.object [
+		'Vpc'
+		'VPC'
+		'VpcConfig'
+		'@Config.Lambda.Vpc'
+		'@Config.Lambda.VPC'
+		'@Config.Lambda.VpcConfig'
+	], {}
+
+	if not Object.keys(vpc).length
+		return {}
+
+	addManagedPolicy ctx, 'AWSLambdaVPCAccessExecutionRole'
+
+	return {
+		VpcConfig: {
+			SecurityGroupIds: objectPath {
+				properties: vpc
+				type: 'array'
+				paths: [ 'SecurityGroups', 'SecurityGroupIds' ]
+			}
+			SubnetIds: objectPath {
+				properties: vpc
+				type: 'array'
+				paths: [ 'Subnets', 'SubnetIds' ]
+			}
+		}
+	}
 
 export default resource (ctx) ->
 
@@ -25,9 +70,12 @@ export default resource (ctx) ->
 	logging		= ctx.boolean [ 'Logging', '@Config.Lambda.Logging' ], false
 	warmer		= ctx.boolean [ 'Warmer', '@Config.Lambda.Warmer' ], false
 	events		= ctx.array 'Events', []
-	externals	= ctx.array [ 'Externals',	'@Config.Lambda.Externals' ], []
-	files		= ctx.object [ 'Files',		'@Config.Lambda.Files' ], {}
-	asyncConfig	= ctx.object 'Async', {}
+	externals	= ctx.array [ 'Externals', '@Config.Lambda.Externals' ], []
+	files		= ctx.object [ 'Files',	'@Config.Lambda.Files' ], {}
+	asyncConfig	= ctx.object [ 'Async', '@Config.Lambda.Async' ], {}
+
+	# force a policy resource to be made
+	addPolicy ctx
 
 	if logging
 		ctx.addResource "#{ ctx.name }LogGroup", {
@@ -63,7 +111,7 @@ export default resource (ctx) ->
 		addPolicy ctx, 'lambda-warmer', {
 			Effect:		'Allow'
 			Action:		'lambda:InvokeFunction'
-			Resource:	Sub "arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:#{ name }"
+			Resource:	Sub "arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:#{ name }:$LATEST"
 		}
 
 	for event, index in events
@@ -75,6 +123,9 @@ export default resource (ctx) ->
 			when 'sns'		then sns ctx, ctx.name, event
 			when 'sqs'		then sqs ctx, ctx.name, event
 			when 'dynamodb'	then dynamodb ctx, ctx.name, event
+			when 'elb'		then elb ctx, ctx.name, event
+			else throw TypeError "Unknown lambda event type: \"#{type}\""
+
 
 	ctx.once 'cleanup', ->
 		dir = path.join process.cwd(), '.awsless', 'lambda'
@@ -119,12 +170,15 @@ export default resource (ctx) ->
 				Timeout:		ctx.number [ 'Timeout', '@Config.Lambda.Timeout' ], 30
 				Layers:			layers
 
+				...reservedConcurrentExecutions ctx
+				...vpcConfig ctx
+
 				Environment: {
 					Variables: {
 						AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
 						AWS_ACCOUNT_ID:	Ref 'AWS::AccountId'
-						...ctx.object '@Config.Lambda.Env', {}
-						...ctx.object 'Env', {}
+						...ctx.object [ '@Config.Lambda.Env', '@Config.Lambda.ENV' ], {}
+						...ctx.object [ 'Env', 'ENV' ], {}
 					}
 				}
 

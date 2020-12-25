@@ -30,7 +30,8 @@ export isFn = (object) ->
 		'Fn::GetAtt'
 		'Fn::Split'
 		'Fn::Select'
+		'Fn::ImportValue'
 	].includes keys[0]
 
 export isArn = (string) ->
-	return typeof string is 'string' and 0 is string.indexOf 'arn:aws:'
+	return typeof string is 'string' and 0 is string.indexOf 'arn:'

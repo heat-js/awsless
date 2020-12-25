@@ -1,4 +1,5 @@
-#!/usr/bin/env node
+`#!/usr/bin/env node
+`
 
 import { Command } 	from 'commander'
 import chalk		from 'chalk'
@@ -18,6 +19,7 @@ program
 	.option '-p, --preview', 'preview the stack template'
 	.option '-s, --skip-prompt', 'skip confirmation prompt'
 	.allowUnknownOption()
+	# .allowExcessArguments()
 	.action Deploy
 
 program
@@ -25,6 +27,7 @@ program
 	.description chalk.cyan 'delete the stack from AWS'
 	.option '-s, --skip-prompt', 'skip confirmation prompt'
 	.allowUnknownOption()
+	# .allowExcessArguments()
 	.action Delete
 
 program.parse process.argv

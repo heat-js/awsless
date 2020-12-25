@@ -9,7 +9,6 @@ export default class Context
 		@name
 		@singletons	= {}
 		@resource	= {}
-		@properties	= {}
 		@template	= {}
 		@outputs	= {}
 		@resources	= {}
@@ -50,7 +49,7 @@ export default class Context
 	singleton: (key, value) ->
 		return @singletons[ key ] or ( @singletons[ key ] = value )
 
-	copy: (name, resource, properties) ->
+	copy: (name, resource) ->
 		return new Context {
 			@resources
 			@singletons
@@ -59,7 +58,6 @@ export default class Context
 			@emitter
 			name
 			resource
-			properties
 		}
 
 	once: (event, callback) ->
@@ -79,7 +77,7 @@ export default class Context
 		return objectPath {
 			@template
 			@resource
-			@properties
+			properties: @resource.Properties
 			type
 			paths
 			defaultValue

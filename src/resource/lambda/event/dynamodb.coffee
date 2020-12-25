@@ -1,7 +1,7 @@
 
 import resource						from '../../../feature/resource'
 import { GetAtt, Sub, isFn, isArn }	from '../../../feature/cloudformation/fn'
-import { addPolicy }				from '../policy'
+import addPolicy					from '../policy'
 
 destinationConfig = (ctx) ->
 	type = ctx.string 'OnFailure.Type', ''
@@ -31,21 +31,22 @@ export default resource (ctx) ->
 
 	Region	= ctx.string '#Region', ''
 	postfix = ctx.string 'Postfix'
-	source	= ctx.string [ 'Stream', 'Arn' ]
+	source	= ctx.string [ 'Stream', 'Arn', 'ARN' ]
 
 	if not isFn(source) and not isArn(source)
-		source = Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:#{ source }"
+		source = Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:#{ source }"
 
 	ctx.addResource "#{ ctx.name }SqsEventSourceMapping#{ postfix }", {
 		Type: 'AWS::Lambda::EventSourceMapping'
 		Region
 		Properties: {
 			Enabled:					true
+			EventSourceArn:				source
 			FunctionName:				GetAtt ctx.name, 'Arn'
 			BatchSize:					ctx.number 'BatchSize', 100
+			StartingPosition:			ctx.string 'StartingPosition', 'LATEST'
 			ParallelizationFactor:		ctx.number 'ParallelizationFactor', 1
 			BisectBatchOnFunctionError:	ctx.boolean 'BisectBatchOnFunctionError', false
-			EventSourceArn:				source
 			MaximumRecordAgeInSeconds:	ctx.number 'MaximumRecordAgeInSeconds', -1
 			MaximumRetryAttempts:		ctx.number 'MaximumRetryAttempts', -1
 			ParallelizationFactor:		ctx.number 'ParallelizationFactor', 1

@@ -1,6 +1,6 @@
 
-import resource			from '../../feature/resource'
-import { addPolicy }	from './policy'
+import resource		from '../../feature/resource'
+import addPolicy	from './policy'
 
 destination = (ctx, name) ->
 	type = ctx.string "#{ name }.Type", ''
@@ -65,7 +65,7 @@ export default resource (ctx) ->
 		Properties: {
 			...destinationConfig ctx
 			FunctionName:				ctx.string [ 'Name', 'FunctionName' ]
-			MaximumEventAgeInSeconds:	ctx.string [ 'MaxEventAgeInSeconds', 'MaximumEventAgeInSeconds' ], 300
+			MaximumEventAgeInSeconds:	ctx.string [ 'MaxEventAgeInSeconds', 'MaximumEventAgeInSeconds' ], 21600
 			MaximumRetryAttempts:		ctx.number [ 'MaxRetryAttempts', 'MaximumRetryAttempts' ], 2
 			Qualifier:					ctx.any 'Qualifier', '$LATEST'
 		}

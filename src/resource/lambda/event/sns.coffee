@@ -6,10 +6,10 @@ export default resource (ctx) ->
 
 	Region	= ctx.string '#Region', ''
 	postfix = ctx.string 'Postfix'
-	topic	= ctx.string 'Topic'
+	topic	= ctx.string [ 'Topic', 'Arn', 'ARN' ]
 
 	if not isFn(topic) and not isArn(topic)
-		topic = Sub "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:#{ topic }"
+		topic = Sub "arn:${AWS::Partition}:sns:${AWS::Region}:${AWS::AccountId}:#{ topic }"
 
 	ctx.addResource "#{ ctx.name }SnsSubscription#{ postfix }", {
 		Type: 'AWS::SNS::Subscription'

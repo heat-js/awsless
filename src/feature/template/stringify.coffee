@@ -6,6 +6,13 @@ export default (template) ->
 		if key is 'Region'
 			return
 
+		if key is 'Fn::GetAtt' and typeof value is 'string'
+			parts = value.split '.'
+			return [
+				parts.shift()
+				parts.join '.'
+			]
+
 		if typeof value is 'object' and value instanceof Reference
 			return value.toJSON()
 

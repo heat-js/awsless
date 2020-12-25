@@ -1,6 +1,6 @@
 
 import Client 			from '../client/cloudformation'
-import { task, warn }	from '../console'
+import { warn }			from '../console'
 import stackStatus 		from './stack-status'
 import stackEventsError from './stack-events-error'
 

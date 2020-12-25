@@ -4,6 +4,8 @@ export default (callback) ->
 		# console.log context, name, properties
 		callback context.copy(
 			name
-			resource
-			properties
+			{
+				...resource
+				Properties: properties
+			}
 		)

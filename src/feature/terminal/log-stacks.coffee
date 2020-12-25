@@ -1,7 +1,6 @@
 
 import Table	from 'tty-table'
 import chalk	from 'chalk'
-import { log }	from '../console'
 import boxen	from 'boxen'
 
 export default (stacks = []) ->
@@ -44,7 +43,7 @@ single = (stack, options) ->
 		compact: true
 	}
 
-	log boxen chalk"""
+	console.log boxen chalk"""
 		{blue.bold  Stack Information}
 		#{ table.render() }
 	""", {

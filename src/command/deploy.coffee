@@ -9,50 +9,51 @@ import split 			from '../feature/template/split'
 import writeFile 		from '../feature/fs/write-file'
 import removeDirectory 	from '../feature/fs/remove-directory'
 import logStacks		from '../feature/terminal/log-stacks'
+# import { log }			from '../feature/console'
 import path 			from 'path'
 import chalk			from 'chalk'
+import util				from 'util'
+import jsonFormat		from 'json-format'
 
-import { task, warn, info, err, confirm } from '../feature/console'
+import { run } from '../feature/terminal/task'
+
+import { log, warn, info, err, confirm } from '../feature/console'
 import { localResolvers, remoteResolvers, resources } from '../config'
 
 export default (options) ->
 
 	try
-		# -----------------------------------------------------
-		# Load the template files
 
-		template = await task(
-			'Loading templates'
-			{ persist: false }
-			load path.join process.cwd(), 'aws'
-		)
+		context = await run (task) ->
+			# -----------------------------------------------------
+			# Load the template files
 
-		# -----------------------------------------------------
-		# Resolve the local variable resolvers
+			task.setContent "Loading templates..."
 
-		template = await task(
-			'Resolve variables'
-			{ persist: false }
-			resolveVariables template, localResolvers
-		)
+			template = await load path.join process.cwd(), 'aws'
 
-		# -----------------------------------------------------
-		# Resolve the remote variable resolvers
+			# -----------------------------------------------------
+			# Resolve the local variable resolvers
 
-		template = await task(
-			'Resolve variables'
-			{ persist: false }
-			resolveVariables template, remoteResolvers
-		)
+			task.setContent "Resolve variables..."
 
-		# -----------------------------------------------------
-		# Parse our custom resources
+			template = await resolveVariables template, localResolvers
 
-		context = await task(
-			'Parsing custom resources'
-			{ persist: false }
-			resolveResources template, resources
-		)
+			# -----------------------------------------------------
+			# Resolve the remote variable resolvers
+
+			template = await resolveVariables template, remoteResolvers
+
+			# -----------------------------------------------------
+			# Parse our custom resources
+
+			task.setContent "Parsing resources..."
+
+			context = await resolveResources template, resources
+
+			# task.setContent "Parsing resources"
+
+			return context
 
 		# -----------------------------------------------------
 		# Split the stack into multiple stacks if needed
@@ -81,20 +82,23 @@ export default (options) ->
 
 		cloudformationDir = path.join process.cwd(), '.awsless', 'cloudformation'
 
-		await removeDirectory cloudformationDir
+		await run (task) ->
+			task.setContent 'Cleaning up...'
+			await Promise.all [
+				removeDirectory cloudformationDir
+				context.emitter.emit 'cleanup'
+			]
 
-		await task(
-			'Cleaning up'
-			context.emitter.emit 'cleanup'
-		)
 
 		# -----------------------------------------------------
 		# Run events before stack update
 
 		# 1
 		await context.emitter.emit 'validate-resource'
+
 		# 2
-		await context.emitter.emit 'prepare-resource'
+		await context.emitter.emitParallel 'prepare-resource'
+
 		# 3
 		await context.emitter.emit 'before-stringify-template'
 
@@ -115,25 +119,29 @@ export default (options) ->
 
 		for stack in stacks
 			file = path.join cloudformationDir, "#{ stack.stack }.#{ stack.region }.json"
-			await writeFile file, stack.template
+			json = JSON.parse stack.template
+			await writeFile file, jsonFormat json
 
 		# -----------------------------------------------------
 		# Log the template to the console
 
-		###
-			Todo...
-		###
+		if options.preview
+			for stack, index in stacks
+				info "Stack #{ index }:"
+				json = JSON.parse stack.template
+				log util.inspect json, false, null, true
 
 		# -----------------------------------------------------
 		# Validate Templates & get the stack capabilities
 
 		await context.emitter.emit 'before-validating-template'
 
-		capabilities = await task(
-			'Validate templates'
-			Promise.all stacks.map (stack) ->
+		capabilities = await run (task) ->
+			task.setContent 'Validate templates...'
+
+			return Promise.all stacks.map (stack) ->
 				return stack.capabilities = await validateTemplate stack
-		)
+
 
 		# -----------------------------------------------------
 		# Log the stack capabilities
@@ -150,9 +158,10 @@ export default (options) ->
 
 		await context.emitter.emit 'before-deploying-stack'
 
-		await task(
-			"Deploying stack"
-			Promise.all stacks.map (stack) ->
+		await run (task) ->
+			task.setContent "Deploying stack..."
+
+			return Promise.all stacks.map (stack) ->
 				return deployStack {
 					stack:			stack.stack
 					profile:		stack.profile
@@ -160,7 +169,7 @@ export default (options) ->
 					template:		stack.template
 					capabilities:	stack.capabilities
 				}
-		)
+
 
 		# -----------------------------------------------------
 		# Run events after stack update
@@ -169,3 +178,5 @@ export default (options) ->
 
 	catch error
 		err error.message
+
+	process.exit 0

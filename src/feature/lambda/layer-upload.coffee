@@ -2,7 +2,7 @@
 import Client				from '../client/s3'
 import path					from 'path'
 import { createReadStream }	from 'fs'
-import { task, warn }		from '../console'
+import { run }				from '../terminal/task'
 import time					from '../performance/time'
 import chalk				from 'chalk'
 import createChecksum		from 'hash-then'
@@ -36,39 +36,38 @@ export default ({ stack, profile, region, bucket, name, zip }) ->
 	key		= "#{ stack }/#{ name }-layer.zip"
 	elapsed = time()
 
-	{ checksum, object } = await task(
-		chalk"Checking Lambda Layer: {yellow #{ name }-layer.zip}"
-		{ persist: false }
-		(->
-			checksum	= await createChecksum file
-			checksum 	= checksum.substr 0, 16
-			object		= await getObject { profile, region, bucket, key }
+	return run (task) ->
+		task.setPrefix 'Lambda Layer'
+		task.setName "#{ name }-layer.zip"
+		task.setContent 'Checking...'
 
-			return { checksum, object }
-		)()
-	)
+		checksum	= await createChecksum file
+		checksum 	= checksum.substr 0, 16
+		object		= await getObject { profile, region, bucket, key }
 
-	if object and object.metadata.checksum is checksum
-		warn chalk"{white Unchanged Lambda Layer: {yellow #{ name }-layer.zip} (build: {blue #{ elapsed() }})}"
-		return { key, version: object.version }
+		if object and object.metadata.checksum is checksum
+			task.warning()
+			task.setContent 'Unchanged'
+			task.addMetadata 'Time', elapsed()
 
-	s3 = Client { profile, region }
+			return { key, version: object.version }
 
-	params = {
-		Bucket: 		bucket
-		Key:			key
-		ACL:			'private'
-		Body:			createReadStream file
-		StorageClass:	'STANDARD'
-		Metadata: {
-			checksum
+		task.setContent 'Uploading...'
+
+		s3 = Client { profile, region }
+
+		result = await s3.putObject {
+			Bucket: 		bucket
+			Key:			key
+			ACL:			'private'
+			Body:			createReadStream file
+			StorageClass:	'STANDARD'
+			Metadata: {
+				checksum
+			}
 		}
-	}
+		.promise()
 
-	result = await task(
-		chalk"Uploading Lambda Layer: {yellow #{ name }-layer.zip} to S3 (build: {blue #{ elapsed() }})"
-		s3.putObject params
-			.promise()
-	)
+		task.setContent 'Uploaded to S3'
 
-	return { key, version: result.VersionId }
+		return { key, version: result.VersionId }

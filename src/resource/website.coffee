@@ -4,8 +4,10 @@ import path				from 'path'
 import resource 		from '../feature/resource'
 import isDirectory		from '../feature/fs/is-directory'
 import clearCache		from '../feature/cloudfront/clear-cache'
-import { task, keyval }	from '../feature/console'
+import { keyval }		from '../feature/console'
+import { run }			from '../feature/terminal/task'
 import fetchExports		from '../feature/fetch/exports'
+import time				from '../feature/performance/time'
 import output			from './output'
 
 import { parseDomain, ParseResultType }	from 'parse-domain'
@@ -132,9 +134,14 @@ export default resource (ctx) ->
 		folder 		= ctx.string 'Syncing.Folder'
 		folder		= path.join process.cwd(), folder
 
-		await task(
-			"Syncing s3 bucket: #{ BucketName }"
-			sync {
+		await run (task) ->
+			elapsed = time()
+
+			task.setPrefix 'S3 Bucket'
+			task.setName BucketName
+			task.setContent 'Syncing...'
+
+			await sync {
 				profile
 				region
 				folder
@@ -143,19 +150,45 @@ export default resource (ctx) ->
 				acl:					ctx.string 'ACL', 'public-read'
 				cacheAge:				ctx.number 'CacheAge', 31536000
 			}
-		)
 
-		if ctx.boolean 'Syncing.ClearCache', true
-			values			= await fetchExports { profile, region }
-			distributionId	= values[ "#{ Stack }-#{ ctx.name }-DistributionId" ]
-			if distributionId
-				await task(
-					"Clearing cloudfront cache: #{ distributionId }"
-					clearCache {
+			if ctx.boolean 'Syncing.ClearCache', true
+				values			= await fetchExports { profile, region }
+				distributionId	= values[ "#{ Stack }-#{ ctx.name }-DistributionId" ]
+				if distributionId
+					task.setContent 'Clearing cloudfront cache...'
+					await clearCache {
 						profile
 						region
 						distributionId
 					}
-				)
 
-		keyval "#{ ctx.name } URL", "https://#{ DomainName }"
+			task.setContent 'Synced'
+			task.addMetadata 'Time', elapsed()
+
+		# await task(
+		# 	"Syncing s3 bucket: #{ BucketName }"
+		# 	sync {
+		# 		profile
+		# 		region
+		# 		folder
+		# 		bucket:					BucketName
+		# 		ignoredExtensions:		ctx.array 'Syncing.IgnoreExtensions', []
+		# 		acl:					ctx.string 'ACL', 'public-read'
+		# 		cacheAge:				ctx.number 'CacheAge', 31536000
+		# 	}
+		# )
+
+		# if ctx.boolean 'Syncing.ClearCache', true
+		# 	values			= await fetchExports { profile, region }
+		# 	distributionId	= values[ "#{ Stack }-#{ ctx.name }-DistributionId" ]
+		# 	if distributionId
+		# 		await task(
+		# 			"Clearing cloudfront cache: #{ distributionId }"
+		# 			clearCache {
+		# 				profile
+		# 				region
+		# 				distributionId
+		# 			}
+		# 		)
+
+		# keyval "#{ ctx.name } URL", "https://#{ DomainName }"

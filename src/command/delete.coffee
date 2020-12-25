@@ -9,46 +9,44 @@ import logStacks		from '../feature/terminal/log-stacks'
 import chalk			from 'chalk'
 import path				from 'path'
 
-import { task, warn, err, confirm } from '../feature/console'
+import { run } from '../feature/terminal/task'
+import { warn, err, confirm } from '../feature/console'
 import { localResolvers, remoteResolvers, resources } from '../config'
 
 export default (options) ->
+
 	try
-		# -----------------------------------------------------
-		# Load the template files
 
-		template = await task(
-			'Loading templates'
-			{ persist: false }
-			load path.join process.cwd(), 'aws'
-		)
+		context = await run (task) ->
+			# -----------------------------------------------------
+			# Load the template files
 
-		# -----------------------------------------------------
-		# Resolve the local variable resolvers
+			task.setContent "Loading templates..."
 
-		template = await task(
-			'Resolve variables'
-			{ persist: false }
-			resolveVariables template, localResolvers
-		)
+			template = await load path.join process.cwd(), 'aws'
 
-		# -----------------------------------------------------
-		# Resolve the remote variable resolvers
+			# -----------------------------------------------------
+			# Resolve the local variable resolvers
 
-		template = await task(
-			'Resolve variables'
-			{ persist: false }
-			resolveVariables template, remoteResolvers
-		)
+			task.setContent "Resolve variables..."
 
-		# -----------------------------------------------------
-		# Parse our custom resources
+			template = await resolveVariables template, localResolvers
 
-		context = await task(
-			'Parsing custom resources'
-			{ persist: false }
-			resolveResources template, resources
-		)
+			# -----------------------------------------------------
+			# Resolve the remote variable resolvers
+
+			template = await resolveVariables template, remoteResolvers
+
+			# -----------------------------------------------------
+			# Parse our custom resources
+
+			task.setContent "Parsing resources..."
+
+			context = await resolveResources template, resources
+
+			# task.setContent "Parsing resources"
+
+			return context
 
 		# -----------------------------------------------------
 		# Split the stack into multiple stacks if needed
@@ -77,12 +75,12 @@ export default (options) ->
 
 		cloudformationDir = path.join process.cwd(), '.awsless', 'cloudformation'
 
-		await removeDirectory cloudformationDir
-
-		await task(
-			'Cleaning up'
-			context.emitter.emit 'cleanup'
-		)
+		await run (task) ->
+			task.setContent 'Cleaning up...'
+			await Promise.all [
+				removeDirectory cloudformationDir
+				context.emitter.emit 'cleanup'
+			]
 
 		# -----------------------------------------------------
 		# Run events before stack delete
@@ -90,22 +88,23 @@ export default (options) ->
 		await context.emitter.emit 'before-deleting-stack'
 
 		# -----------------------------------------------------
-		# Deleting stack
-
 		# Split the stacks again to make sure we have all the
 		# template changes committed
 
 		stacks = split context
 
-		await task(
-			"Deleting stack"
-			Promise.all stacks.map (stack) ->
+		# -----------------------------------------------------
+		# Deleting stack
+
+		await run (task) ->
+			task.setContent "Deleting stack..."
+
+			return Promise.all stacks.map (stack) ->
 				return deleteStack {
 					stack:		stack.stack
 					profile:	stack.profile
 					region:		stack.region
 				}
-		)
 
 		# -----------------------------------------------------
 		# Run events after stack delete
@@ -114,3 +113,5 @@ export default (options) ->
 
 	catch error
 		err error.message
+
+	process.exit 0

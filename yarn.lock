@@ -214,10 +214,10 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@heat/npm-coffee-publisher@^0.1.6":
-  version "0.1.6"
-  resolved "https://registry.yarnpkg.com/@heat/npm-coffee-publisher/-/npm-coffee-publisher-0.1.6.tgz#2418cb0fa288af6bd4e5bbc18474da24ad8e5be9"
-  integrity sha512-nNzXMHab6SOgoPgncvSG1UuYsveYcbqz9SNjHN6laWbNQnyAfH+DSQml6Xl6V679kCy1Q4AiBTEQTbw6MLTgnQ==
+"@heat/npm-coffee-publisher@^0.1.8":
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/@heat/npm-coffee-publisher/-/npm-coffee-publisher-0.1.8.tgz#02ee936ae7b95922b405e812bc0bc37b8d105864"
+  integrity sha512-n2lCrdAf2l5oYTYrDQ4dpke+70FHDtT7lJkKHrQtTn3PWr9oULK1KCJ4lKH5sueRpQj7PJvulh14GdjvTUY4og==
   dependencies:
     "@babel/core" "^7.4.0"
     babel-plugin-transform-es2015-modules-commonjs "^6.26.2"
@@ -1401,7 +1401,7 @@ call-bind@^1.0.0:
     function-bind "^1.1.1"
     get-intrinsic "^1.0.0"
 
-callsites@^3.0.0:
+callsites@^3.0.0, callsites@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/callsites/-/callsites-3.1.0.tgz#b3630abd8943432f54b3f0519238e33cd7df2f73"
   integrity sha512-P8BjAsXvZS+VIDUI11hHCQEv74YT67YUi5JJFNWIqL235sBmjX4+qx9Muvls5ivyNENctx46xQLQ3aTuE7ssaQ==
@@ -1633,10 +1633,10 @@ commander@^2.20.0:
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.20.3.tgz#fd485e84c03eb4881c20722ba48035e8531aeb33"
   integrity sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==
 
-commander@^7.0.0-1:
-  version "7.0.0-1"
-  resolved "https://registry.yarnpkg.com/commander/-/commander-7.0.0-1.tgz#c55188136d80d1a0df19ae21c3317fa0bc21c6a0"
-  integrity sha512-5yh6ihhjDbdt8nchmjJINF5ttoczMFPEdSn9VBK3v+Yg+SsozGTdonkLf6GFOzKu8o2PwVjYorARioDLgbd3oA==
+commander@^6.2.1:
+  version "6.2.1"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-6.2.1.tgz#0792eb682dfbc325999bb2b84fddddba110ac73c"
+  integrity sha512-U7VdrJFnJgo4xjrHpTzu0yrHPGImdsmD95ZlgYSEajAn2JKzDhDTPG9kBTefmObL2w/ngeZnilk+OV9CG3d7UA==
 
 component-emitter@^1.2.1:
   version "1.3.0"
@@ -1833,6 +1833,11 @@ domexception@^1.0.1:
   dependencies:
     webidl-conversions "^4.0.2"
 
+draftlog@^1.0.12:
+  version "1.0.12"
+  resolved "https://registry.yarnpkg.com/draftlog/-/draftlog-1.0.12.tgz#7db6a3c5b62106bb32dd4a35d67bcccb6c7d9da0"
+  integrity sha1-fbajxbYhBrsy3Uo11nvMy2x9naA=
+
 ecc-jsbn@~0.1.1:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/ecc-jsbn/-/ecc-jsbn-0.1.2.tgz#3a83a904e54353287874c564b7549386849a98c9"
@@ -1966,6 +1971,11 @@ eslint-scope@^5.1.1:
   dependencies:
     esrecurse "^4.3.0"
     estraverse "^4.1.1"
+
+esm@^3.2.25:
+  version "3.2.25"
+  resolved "https://registry.yarnpkg.com/esm/-/esm-3.2.25.tgz#342c18c29d56157688ba5ce31f8431fbb795cc10"
+  integrity sha512-U1suiZ2oDVWv4zPO56S0NcR5QriEahGtdN2OR6FiOG4WJvcjBVFB0qI4+eKoWFH483PKGuLuu6V8Z4T5g63UVA==
 
 esprima@^4.0.0, esprima@^4.0.1:
   version "4.0.1"
@@ -2626,6 +2636,13 @@ is-number@^6.0.0:
   resolved "https://registry.yarnpkg.com/is-number/-/is-number-6.0.0.tgz#e6d15ad31fc262887cccf217ae5f9316f81b1995"
   integrity sha512-Wu1VHeILBK8KAWJUAiSZQX94GmOE45Rg6/538fKwiloUu21KncEkYGPqob2oSZ5mUT73vLGrHQjKw3KMPwfDzg==
 
+is-observable@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/is-observable/-/is-observable-1.1.0.tgz#b3e986c8f44de950867cab5403f5a3465005975e"
+  integrity sha512-NqCa4Sa2d+u7BWc6CukaObG3Fh+CU9bvixbpcXYhy2VvYS7vVGIdAgnIS5Ks3A/cqk4rebLJ9s8zBstT2aKnIA==
+  dependencies:
+    symbol-observable "^1.1.0"
+
 is-plain-object@^2.0.3, is-plain-object@^2.0.4:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/is-plain-object/-/is-plain-object-2.0.4.tgz#2c163b3fafb1b606d9d17928f05c2a1c38e07677"
@@ -3093,7 +3110,7 @@ jest-worker@^24.6.0, jest-worker@^24.9.0:
     merge-stream "^2.0.0"
     supports-color "^6.1.0"
 
-jest-worker@^26.6.1:
+jest-worker@^26.6.1, jest-worker@^26.6.2:
   version "26.6.2"
   resolved "https://registry.yarnpkg.com/jest-worker/-/jest-worker-26.6.2.tgz#7f72cbc4d643c365e27b9fd775f9d0eaa9c7a8ed"
   integrity sha512-KWYVV1c4i+jbMpaBC+U++4Va0cp8OisU185o73T1vo99hqi7w8tSJfUXYswwqqrjzwxa6KpRK54WhPvwf5w6PQ==
@@ -3181,6 +3198,11 @@ jsesc@^2.5.1:
   version "2.5.2"
   resolved "https://registry.yarnpkg.com/jsesc/-/jsesc-2.5.2.tgz#80564d2e483dacf6e8ef209650a67df3f0c283a4"
   integrity sha512-OYu7XEzjkCQ3C5Ps3QIZsQfNpqoJyZZA99wd9aWd05NCtC5pWOkShK2mkL6HXQR6/Cy2lbNdPlZBpuQHXE63gA==
+
+json-format@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/json-format/-/json-format-1.0.1.tgz#143f67e62af129d6bffed288a46265ea23d0df0c"
+  integrity sha1-FD9n5irxKda//tKIpGJl6iPQ3ww=
 
 json-parse-better-errors@^1.0.1, json-parse-better-errors@^1.0.2:
   version "1.0.2"
@@ -3694,6 +3716,11 @@ object.pick@^1.3.0:
   integrity sha1-h6EKxMFpS9Lhy/U1kaZhQftd10c=
   dependencies:
     isobject "^3.0.1"
+
+observable-fns@^0.5.1:
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/observable-fns/-/observable-fns-0.5.1.tgz#9b56478690dd0fa8603e3a7e7d2975d88bca0904"
+  integrity sha512-wf7g4Jpo1Wt2KIqZKLGeiuLOEMqpaOZ5gJn7DmSdqXgTdxRwSdBhWegQQpPteQ2gZvzCKqNNpwb853wcpA0j7A==
 
 once@^1.3.0, once@^1.3.1, once@^1.4.0:
   version "1.4.0"
@@ -4775,6 +4802,11 @@ supports-color@^7.0.0, supports-color@^7.1.0:
   dependencies:
     has-flag "^4.0.0"
 
+symbol-observable@^1.1.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/symbol-observable/-/symbol-observable-1.2.0.tgz#c22688aed4eab3cdc2dfeacbb561660560a00804"
+  integrity sha512-e900nM8RRtGhlV36KGEU9k65K3mPb1WV70OdjfxlG2EAuM1noi/E/BaW/uMhL7bPEssK8QV57vN3esixjUvcXQ==
+
 symbol-tree@^3.2.2:
   version "3.2.4"
   resolved "https://registry.yarnpkg.com/symbol-tree/-/symbol-tree-3.2.4.tgz#430637d248ba77e078883951fb9aa0eed7c63fa2"
@@ -4853,6 +4885,18 @@ test-exclude@^5.2.3:
     read-pkg-up "^4.0.0"
     require-main-filename "^2.0.0"
 
+threads@^1.6.3:
+  version "1.6.3"
+  resolved "https://registry.yarnpkg.com/threads/-/threads-1.6.3.tgz#89324a93509403c90a169344023151ae1fe4986b"
+  integrity sha512-tKwFIWRgfAT85KGkrpDt2jWPO8IVH0sLNfB/pXad/VW9eUIY2Zlz+QyeizypXhPHv9IHfqRzvk2t3mPw+imhWw==
+  dependencies:
+    callsites "^3.1.0"
+    debug "^4.1.1"
+    is-observable "^1.1.0"
+    observable-fns "^0.5.1"
+  optionalDependencies:
+    tiny-worker ">= 2"
+
 throat@^4.0.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/throat/-/throat-4.1.0.tgz#89037cbc92c56ab18926e6ba4cbb200e15672a6a"
@@ -4862,6 +4906,13 @@ time-stamp@^1.0.1:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/time-stamp/-/time-stamp-1.1.0.tgz#764a5a11af50561921b133f3b44e618687e0f5c3"
   integrity sha1-dkpaEa9QVhkhsTPztE5hhofg9cM=
+
+"tiny-worker@>= 2":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/tiny-worker/-/tiny-worker-2.3.0.tgz#715ae34304c757a9af573ae9a8e3967177e6011e"
+  integrity sha512-pJ70wq5EAqTAEl9IkGzA+fN0836rycEuz2Cn6yeZ6FRzlVS5IDOkFHpIoEsksPRQV34GDqXm65+OlnZqUSyK2g==
+  dependencies:
+    esm "^3.2.25"
 
 tmpl@1.0.x:
   version "1.0.4"

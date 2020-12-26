@@ -1,6 +1,6 @@
 {
 	"name": "@heat/awsless",
-	"version": "0.0.314",
+	"version": "0.0.315",
 	"license": "MIT",
 	"bin": {
 		"awsless": "./awsless.js"
@@ -8,6 +8,7 @@
 	"scripts": {
 		"test": "./node_modules/.bin/jest",
 		"demo": "./node_modules/.bin/coffee -t ./cli/demo.coffee",
+		"demo-yaml": "./node_modules/.bin/coffee -t ./cli/yaml.coffee",
 		"patch": "yarn version --patch; ./node_modules/.bin/ncp",
 		"minor": "yarn version --minor; ./node_modules/.bin/ncp",
 		"major": "yarn version --major; ./node_modules/.bin/ncp"

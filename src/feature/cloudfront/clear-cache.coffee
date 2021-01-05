@@ -1,5 +1,6 @@
 
 import AWS from 'aws-sdk'
+# import credentials from '../credentials'
 
 export default ({ profile, region, distributionId }) ->
 

@@ -1,6 +1,7 @@
 
 import AWS		from 'aws-sdk'
 import cache	from 'function-cache'
+# import credentials from '../credentials'
 
 export default cache ({ profile, region }) ->
 	cloudFormation = new AWS.CloudFormation {

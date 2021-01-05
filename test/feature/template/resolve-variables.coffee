@@ -1,6 +1,7 @@
 
 import resolveVariables	from '../../../src/feature/template/resolve-variables'
 import Var				from '../../../src/variable-resolver/var'
+# import opt				from '../../../src/variable-resolver/var'
 
 describe 'Resolve Variables', ->
 	resolvers = {
@@ -100,19 +101,21 @@ describe 'Resolve Variables', ->
 
 	it 'should resolve recursive variables', ->
 		template = {
-			one: 'foo'
-			three: '${ var:two }'
-			two: '${ var:one }'
-			four: '${ var:three }'
+			one: 'a'
+			three: 'b-${ var:two }'
+			two: 'c-${ var:one }'
+			four: 'd-${ var:three }'
+			five: 'e-${var:three}'
 		}
 
 		result = await resolveVariables template, resolvers
 		expect result
 			.toStrictEqual {
-				one: 'foo'
-				two: 'foo'
-				three: 'foo'
-				four: 'foo'
+				one: 'a'
+				two: 'c-a'
+				three: 'b-c-a'
+				four: 'd-b-c-a'
+				five: 'e-b-c-a'
 			}
 
 	# it 'should resolve structures', ->

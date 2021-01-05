@@ -1,13 +1,13 @@
 
-# makeRegex = ->
-# 	return /\$\{ *([a-z]+)\:([a-z0-9-_/\.:]+) *\}/gmi
+makeRegex = ->
+	return /\$\{ *(([a-z]+)\:([a-z0-9-_/\.:]+)) *\}/gmi
 
 variablesItem = (variableResolvers, variables, key, value, object) ->
 	switch typeof value
 		when 'string'
-			regex = /\$\{ *([a-z]+)\:([a-z0-9-_/\.:]+) *\}/gmi
+			regex = makeRegex()
 			while matches = regex.exec value
-				[ match, type, path ] = matches
+				[ _, match, type, path ] = matches
 
 				if not variableResolvers[type]
 					continue
@@ -27,19 +27,39 @@ findVariables = (variableResolvers, variables, object) ->
 				variablesItem variableResolvers, variables, key, value, object
 
 condenseReplacements = (replacements) ->
+
+	regex = makeRegex()
 	limit = 10
 	while limit--
 		replaced = false
 		for original, replacement of replacements
-			value = replacements[ replacement ]
-			if typeof value isnt 'undefined'
-				replacements[ original ] = value
+			if typeof replacement isnt 'string'
+				continue
+
+			replacements[ original ] = replacement.replace regex, (_, match) ->
 				replaced = true
+				return replacements[ match ]
 
 		if not replaced
 			break
 
 	return replacements
+
+	# limit = 10
+	# while limit--
+	# 	replaced = false
+	# 	for original, replacement of replacements
+	# 		value = replacements[ replacement ]
+	# 		if typeof value isnt 'undefined'
+	# 			replacements[ original ] = value
+	# 			replaced = true
+
+	# 	if not replaced
+	# 		break
+
+	# console.log replacements
+
+	# return replacements
 
 getVariableReplacements = (variableResolvers, variables, template) ->
 	replacements = {}
@@ -67,22 +87,62 @@ export default (template, variableResolvers = {}) ->
 	variables = []
 	findVariables variableResolvers, variables, template
 
+	# console.log 'variables', variables
+
 	replacements = await getVariableReplacements variableResolvers, variables, template
+	# console.log 'replacements 1', replacements
+
 	replacements = condenseReplacements replacements
 
+	# console.log 'replacements 2', replacements
+
+	regex = makeRegex()
 	errors = []
 
-	for entry, index in variables
-		value		= entry.object[ entry.key ]
-		replacement = replacements[ entry.match ]
+	# console.log variables
 
-		if typeof replacement isnt 'undefined'
-			value = value.replace entry.match, replacement
-			entry.object[ entry.key ] = value
-		else
-			errors.push entry.match
+	for entry in variables
+		entry.object[ entry.key ] = entry.object[ entry.key ].replace regex, (original, match) ->
+			if match isnt entry.match
+				return original
+
+			replacement = replacements[ match ]
+			if typeof replacement is 'undefined'
+				errors.push match
+				return original
+
+			return replacement
+
+		# 		return replacements[ entry.match ]
+
+		# replacement = replacements[ entry.match ]
+
+		# if typeof replacement isnt 'undefined'
+		# 	value = value.replace entry.match, replacement
+		# 	# console.log entry.object[ entry.key ], value, replacement
+		# 	entry.object[ entry.key ] = value
+		# else
+		# 	errors.push entry.match
 
 	if errors.length
 		throw new Error "Unable to resolve variables: #{ errors.join ', ' }"
 
 	return template
+
+	# errors = []
+
+	# for entry, index in variables
+	# 	value		= entry.object[ entry.key ]
+	# 	replacement = replacements[ entry.match ]
+
+	# 	if typeof replacement isnt 'undefined'
+	# 		value = value.replace entry.match, replacement
+	# 		# console.log entry.object[ entry.key ], value, replacement
+	# 		entry.object[ entry.key ] = value
+	# 	else
+	# 		errors.push entry.match
+
+	# if errors.length
+	# 	throw new Error "Unable to resolve variables: #{ errors.join ', ' }"
+
+	# return template

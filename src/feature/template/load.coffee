@@ -2,8 +2,14 @@
 import fs							from 'fs'
 import path 						from 'path'
 import YAML							from 'js-yaml'
-import { CLOUDFORMATION_SCHEMA }	from 'js-yaml-cloudformation-schema'
+import { cloudformationTags }		from 'js-yaml-cloudformation-schema'
+import customTypes					from './custom-yaml-types'
 import isDirectory					from '../fs/is-directory'
+
+schema = YAML.Schema.create [
+	...cloudformationTags
+	...customTypes
+]
 
 recursiveReadDir = (directory) ->
 	files = await fs.promises.readdir directory
@@ -36,12 +42,12 @@ export default (directory) ->
 		return [ '.yml', '.yaml' ].includes extension
 
 	if files.length is 0
-		throw new Error "AWS template directory has not template files inside."
+		throw new Error "AWS template directory has no template files inside."
 
 	files = await Promise.all files.map (file) ->
 		data = await fs.promises.readFile file
 		return YAML.load data, {
-			schema: CLOUDFORMATION_SCHEMA
+			schema
 		}
 
 	return Object.assign {}, ...files

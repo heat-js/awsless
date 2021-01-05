@@ -14,7 +14,7 @@ describe 'Template Load', ->
 
 	it 'should throw when directory is empty', ->
 		await expect load path.join dir, 'empty'
-			.rejects.toThrow "AWS template directory has not template files inside"
+			.rejects.toThrow "AWS template directory has no template files inside"
 
 	it 'should throw when directory doesn\'t exist', ->
 		await expect load path.join dir, 'unknown'

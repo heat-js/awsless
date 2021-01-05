@@ -25,7 +25,7 @@ export default resource (ctx) ->
 	postfix 		= ctx.string 'Postfix'
 	listener		= ctx.string [ 'Listener', 'Arn', 'ARN' ]
 	priority		= ctx.number 'Priority'
-	targetGroupName	= "#{ stack }-#{ ctx.name }ElbTargetGroupName#{ postfix }"
+	targetGroupName	= "#{ stack }-#{ ctx.name }-#{ postfix }"
 
 	ctx.addResource "#{ ctx.name }ElbLambdaPermission#{ postfix }", {
 		Type: 'AWS::Lambda::Permission'

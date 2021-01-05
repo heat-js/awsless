@@ -2,7 +2,7 @@
 import AWS		from 'aws-sdk'
 import store	from 'aws-param-store'
 import cache	from 'function-cache'
-# import credentials from '../credentials'
+import credentials from '../client/credentials'
 
 formatPaths = (paths) ->
 	return paths.map (path) ->

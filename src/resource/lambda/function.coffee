@@ -83,7 +83,7 @@ export default resource (ctx) ->
 			Region: region
 			Properties: {
 				LogGroupName:		"/aws/lambda/#{ name }"
-				RetentionInDays:	ctx.boolean [ 'LogRetentionInDays', '@Config.Lambda.LogRetentionInDays' ], 14
+				RetentionInDays:	ctx.number [ 'LogRetentionInDays', '@Config.Lambda.LogRetentionInDays' ], 14
 			}
 		}
 

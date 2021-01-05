@@ -1,11 +1,10 @@
 
-import AWS		from 'aws-sdk'
-import cache	from 'function-cache'
+import cache			from 'function-cache'
+import CloudFormation	from '../client/cloudformation'
 
 export default cache ({ profile, region }) ->
-	cloudFormation = new AWS.CloudFormation {
-		apiVersion: '2010-05-15'
-		credentials: new AWS.SharedIniFileCredentials { profile }
+	cloudFormation = CloudFormation {
+		profile
 		region
 	}
 

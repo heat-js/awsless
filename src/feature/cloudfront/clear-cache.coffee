@@ -1,11 +1,10 @@
 
-import AWS from 'aws-sdk'
+import CloudFront from '../client/cloudfront'
 
 export default ({ profile, region, distributionId }) ->
 
-	cloudfront = new AWS.CloudFront {
-		apiVersion: '2019-03-26'
-		credentials: new AWS.SharedIniFileCredentials { profile }
+	cloudfront = CloudFront {
+		profile
 		region
 	}
 

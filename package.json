@@ -1,6 +1,6 @@
 {
 	"name": "@heat/awsless",
-	"version": "0.0.343",
+	"version": "0.0.344",
 	"license": "MIT",
 	"bin": {
 		"awsless": "./awsless.js"
@@ -23,20 +23,24 @@
 		"testEnvironment": "node",
 		"rootDir": "./test/",
 		"testPathIgnorePatterns": [
-			"/data/"
+			"/data/",
+			"/_files/"
 		]
 	},
 	"dependencies": {
+		"@graphql-tools/merge": "^6.2.7",
 		"@heat/s3-deploy": "^0.0.12",
 		"aws-param-store": "^3.2.0",
 		"aws-sdk": "^2.795.0",
 		"boxen": "^4.2.0",
+		"capitalize": "^2.0.3",
 		"coffee-loader": "^1.0.1",
 		"commander": "^6.2.1",
 		"draftlog": "^1.0.12",
 		"filesize": "^6.1.0",
 		"function-cache": "^1.0.5",
 		"get-all-files": "^3.0.0",
+		"graphql": "^15.4.0",
 		"hash-then": "^1.1.1",
 		"jest-worker": "^26.6.2",
 		"js-yaml-cloudformation-schema": "^1.0.0",

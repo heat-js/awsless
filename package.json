@@ -1,6 +1,6 @@
 {
 	"name": "@heat/awsless",
-	"version": "0.0.381",
+	"version": "0.0.382",
 	"license": "MIT",
 	"bin": {
 		"awsless": "./awsless.js"
@@ -29,7 +29,7 @@
 	},
 	"dependencies": {
 		"@graphql-tools/merge": "^6.2.7",
-		"@heat/s3-deploy": "^0.0.12",
+		"@heat/s3-deploy": "^0.0.13",
 		"aws-param-store": "^3.2.0",
 		"aws-sdk": "^2.795.0",
 		"boxen": "^4.2.0",

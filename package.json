@@ -1,10 +1,11 @@
 {
 	"name": "@heat/awsless",
-	"version": "0.0.399",
+	"version": "0.0.400",
 	"license": "MIT",
 	"bin": {
 		"awsless": "./awsless.js"
 	},
+	"main": "./index.js",
 	"scripts": {
 		"test": "./node_modules/.bin/jest",
 		"demo": "./node_modules/.bin/coffee -t ./cli/demo.coffee",

@@ -1,5 +1,6 @@
 
 import awsless	from '../src/awsless'
+import { load }	from '../src/index'
 import path		from 'path'
 import fs		from 'fs'
 

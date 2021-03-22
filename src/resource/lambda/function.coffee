@@ -4,15 +4,17 @@ import uploadLambda			from '../../feature/lambda/upload'
 import { Ref, GetAtt, Sub }	from '../../feature/cloudformation/fn'
 import removeDirectory		from '../../feature/fs/remove-directory'
 import objectPath 			from '../../feature/object-path'
+import createChecksum 		from '../../feature/crypto/checksum'
 import path					from 'path'
 import cron					from './event/cron'
 import sns					from './event/sns'
 import sqs					from './event/sqs'
 import dynamodb				from './event/dynamodb'
 import elb					from './event/elb'
+import iot					from './event/iot'
 import eventInvokeConfig	from './event-invoke-config'
 import output				from '../output'
-import addPolicy, { addManagedPolicy } from './policy'
+import addPolicy, { addManagedPolicy, policyChecksum } from './policy'
 
 reservedConcurrentExecutions = (ctx) ->
 	reserved = ctx.number [
@@ -57,6 +59,21 @@ vpcConfig = (ctx) ->
 		}
 	}
 
+environmentVariables = (ctx) ->
+	if ctx.boolean [ 'RemoveEnv', '@Config.Lambda.RemoveEnv' ], false
+		return {}
+
+	return {
+		Environment: {
+			Variables: {
+				AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+				AWS_ACCOUNT_ID:	Ref 'AWS::AccountId'
+				...ctx.object [ '@Config.Lambda.Env', '@Config.Lambda.ENV' ], {}
+				...ctx.object [ 'Env', 'ENV' ], {}
+			}
+		}
+	}
+
 export default resource (ctx) ->
 
 	stack		= ctx.string [ '#Stack',	'@Config.Stack' ]
@@ -64,8 +81,11 @@ export default resource (ctx) ->
 	profile		= ctx.string [ '#Profile',	'@Config.Profile' ]
 
 	bucket		= ctx.string [ 'DeploymentBucket', '@Config.Lambda.DeploymentBucket' ]
+	prefixName	= ctx.string '@Config.PrefixResourceName', ''
 	name		= ctx.string [ 'Name', 'FunctionName' ]
+	name		= "#{ prefixName }#{ name }"
 	handle		= ctx.string 'Handle'
+	role		= ctx.string [ 'Role', '@Config.Lambda.Role' ], ''
 	layers		= ctx.array [ 'Layers', '@Config.Lambda.Layers' ], []
 	logging		= ctx.boolean [ 'Logging', '@Config.Lambda.Logging' ], false
 	warmer		= ctx.boolean [ 'Warmer', '@Config.Lambda.Warmer' ], false
@@ -73,6 +93,8 @@ export default resource (ctx) ->
 	externals	= ctx.array [ 'Externals', '@Config.Lambda.Externals' ], []
 	files		= ctx.object [ 'Files',	'@Config.Lambda.Files' ], {}
 	asyncConfig	= ctx.object [ 'Async', '@Config.Lambda.Async' ], {}
+
+	# versionedArnExportName		= ctx.object [ 'Async', '@Config.Lambda.Async' ], {}
 
 	# force a policy resource to be made
 	addPolicy ctx
@@ -124,6 +146,7 @@ export default resource (ctx) ->
 			when 'sqs'		then sqs ctx, ctx.name, event
 			when 'dynamodb'	then dynamodb ctx, ctx.name, event
 			when 'elb'		then elb ctx, ctx.name, event
+			when 'iot'		then iot ctx, ctx.name, event
 			else throw TypeError "Unknown lambda event type: \"#{type}\""
 
 
@@ -143,6 +166,8 @@ export default resource (ctx) ->
 			files
 		}
 
+		# checksum = createChecksum checksum, policyChecksum ctx
+
 		ctx.addResource "#{ ctx.name }Version#{ checksum }", {
 			Type: 'AWS::Lambda::Version'
 			Region: region
@@ -152,6 +177,9 @@ export default resource (ctx) ->
 				CodeSha256:		hash
 			}
 		}
+
+		ctx.setAttribute ctx.name, 'Version',		GetAtt "#{ ctx.name }Version#{ checksum }", 'Version'
+		ctx.setAttribute ctx.name, 'VersionedArn',	Ref "#{ ctx.name }Version#{ checksum }"
 
 		ctx.addResource ctx.name, {
 			Type: 'AWS::Lambda::Function'
@@ -164,7 +192,7 @@ export default resource (ctx) ->
 				}
 				FunctionName:	name
 				Handler:		"index#{ path.extname handle }"
-				Role:			GetAtt 'LambdaPolicyIamRole', 'Arn'
+				Role:			role or GetAtt 'LambdaPolicyIamRole', 'Arn'
 				MemorySize:		ctx.number [ 'MemorySize', '@Config.Lambda.MemorySize' ], 128
 				Runtime:		ctx.string [ 'Runtime', '@Config.Lambda.Runtime' ], 'nodejs12.x'
 				Timeout:		ctx.number [ 'Timeout', '@Config.Lambda.Timeout' ], 30
@@ -172,15 +200,7 @@ export default resource (ctx) ->
 
 				...reservedConcurrentExecutions ctx
 				...vpcConfig ctx
-
-				Environment: {
-					Variables: {
-						AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
-						AWS_ACCOUNT_ID:	Ref 'AWS::AccountId'
-						...ctx.object [ '@Config.Lambda.Env', '@Config.Lambda.ENV' ], {}
-						...ctx.object [ 'Env', 'ENV' ], {}
-					}
-				}
+				...environmentVariables ctx
 
 				Tags: [
 					...ctx.array 'Tags', []

@@ -3,7 +3,7 @@
 import Client				from '../client/s3'
 import path					from 'path'
 # import build				from './build'
-import createHash 			from '../crypto/hash'
+import createHash 			from '../crypto/hash-file'
 import zip 					from '../fs/zip-files'
 import { createReadStream }	from 'fs'
 # import { task, warn }		from '../console'

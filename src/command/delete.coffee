@@ -6,12 +6,13 @@ import split 			from '../feature/template/split'
 import deleteStack		from '../feature/cloudformation/delete-stack'
 import removeDirectory 	from '../feature/fs/remove-directory'
 import logStacks		from '../feature/terminal/log-stacks'
+import log				from '../feature/terminal/log'
+import { run }			from '../feature/terminal/task'
 import chalk			from 'chalk'
 import path				from 'path'
 
-import { run } from '../feature/terminal/task'
-import { warn, err, confirm } from '../feature/console'
-import { localResolvers, remoteResolvers, resources } from '../config'
+# import { warn, err, success, confirm } from '../feature/console'
+import { localResolvers, remoteResolvers, logicalResolvers, resources } from '../config'
 
 export default (options) ->
 
@@ -36,6 +37,11 @@ export default (options) ->
 			# Resolve the remote variable resolvers
 
 			template = await resolveVariables template, remoteResolvers
+
+			# -----------------------------------------------------
+			# Resolve the logical resolvers
+
+			template = await resolveVariables template, logicalResolvers
 
 			# -----------------------------------------------------
 			# Parse our custom resources
@@ -66,8 +72,8 @@ export default (options) ->
 		# Show confirm prompt
 
 		if not options.skipPrompt
-			if not await confirm chalk"Are u sure you want to {red delete} the stack?"
-				warn 'Cancelled.'
+			if not await log.confirm chalk"Are u sure you want to {red delete} the stack?"
+				log.warning 'Cancelled.'
 				return
 
 		# -----------------------------------------------------
@@ -94,17 +100,14 @@ export default (options) ->
 		stacks = split context
 
 		# -----------------------------------------------------
-		# Deleting stack
+		# Deleting stacks
 
-		await run (task) ->
-			task.setContent "Deleting stack..."
-
-			return Promise.all stacks.map (stack) ->
-				return deleteStack {
-					stack:		stack.stack
-					profile:	stack.profile
-					region:		stack.region
-				}
+		await Promise.all stacks.map (stack) ->
+			return deleteStack {
+				stack:		stack.stack
+				profile:	stack.profile
+				region:		stack.region
+			}
 
 		# -----------------------------------------------------
 		# Run events after stack delete
@@ -112,6 +115,6 @@ export default (options) ->
 		await context.emitter.emit 'after-deleting-stack'
 
 	catch error
-		err error.message
+		log.error error
 
 	process.exit 0

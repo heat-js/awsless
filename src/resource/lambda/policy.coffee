@@ -1,6 +1,7 @@
 
 
-import resource	from '../../feature/resource'
+import resource				from '../../feature/resource'
+import createHash 			from '../../feature/crypto/hash'
 import { isFn, isArn, Sub }	from '../../feature/cloudformation/fn'
 
 uniqueArray = (array) ->
@@ -50,6 +51,13 @@ export addManagedPolicy = (ctx, policy) ->
 
 	policies = ctx.singleton 'lambda-managed-policies', []
 	policies.push policy
+
+export policyChecksum = (ctx) ->
+	content = JSON.stringify [
+		ctx.singleton 'lambda-managed-policies', []
+		ctx.singleton 'lambda-policies', {}
+	]
+	return createHash 'md5', content, 'hex'
 
 managedPolicyArns = (ctx) ->
 	policies = ctx.singleton 'lambda-managed-policies', []

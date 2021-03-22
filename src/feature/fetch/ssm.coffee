@@ -1,7 +1,8 @@
 
-import AWS		from 'aws-sdk'
-import store	from 'aws-param-store'
-import cache	from 'function-cache'
+import AWS			from 'aws-sdk'
+import store		from 'aws-param-store'
+import cache		from '../utils/function-cache'
+import Credentials	from '../client/credentials'
 
 formatPaths = (paths) ->
 	return paths.map (path) ->
@@ -13,7 +14,7 @@ formatPaths = (paths) ->
 export default cache ({ paths, profile, region }) ->
 	formattedPaths = formatPaths paths
 	result = await store.getParameters formattedPaths, {
-		credentials: new AWS.SharedIniFileCredentials { profile }
+		credentials: Credentials { profile }
 		region
 	}
 
@@ -21,6 +22,9 @@ export default cache ({ paths, profile, region }) ->
 	for formattedPath, index in formattedPaths
 		parameter = result.Parameters.find (item) ->
 			return item.Name is formattedPath
+
+		if not parameter
+			throw new Error "SSM value not found: #{ formattedPath }"
 
 		parameters[ paths[index] ] = parameter.Value
 

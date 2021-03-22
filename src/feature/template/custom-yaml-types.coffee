@@ -12,10 +12,14 @@ customType = (name, kind, sep) ->
 	}
 
 export default [
+	customType 'when',	'sequence', ','
+	customType 'attr',	'sequence', '.'
+	customType 'attr',	'scalar'
 	customType 'cf',	'sequence', ':'
 	customType 'cf',	'scalar'
 	customType 'var',	'sequence', '.'
 	customType 'var',	'scalar'
+	customType 'ssm',	'sequence', ':'
 	customType 'ssm',	'scalar'
 	customType 'opt',	'scalar'
 	customType 'env',	'scalar'

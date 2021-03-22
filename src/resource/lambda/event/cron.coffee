@@ -27,10 +27,10 @@ export default resource (ctx) ->
 		Type: 'AWS::Lambda::Permission'
 		Region
 		Properties: {
-			FunctionName: GetAtt ctx.name, 'Arn'
-			Action:	'lambda:InvokeFunction'
-			Principal: 'events.amazonaws.com'
-			SourceArn: GetAtt "#{ ctx.name }EventsRule#{ postfix }", 'Arn'
+			FunctionName:	GetAtt ctx.name, 'Arn'
+			Action:			'lambda:InvokeFunction'
+			Principal:		'events.amazonaws.com'
+			SourceArn:		GetAtt "#{ ctx.name }EventsRule#{ postfix }", 'Arn'
 		}
 	}
 

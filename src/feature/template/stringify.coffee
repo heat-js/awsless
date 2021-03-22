@@ -1,7 +1,8 @@
 
+import { isAttr, resolve } from '../../attribute'
 import Reference from '../../reference'
 
-export default (template) ->
+export default (template, globals) ->
 	return JSON.stringify template, (key, value) ->
 		if key is 'Region'
 			return
@@ -13,7 +14,11 @@ export default (template) ->
 				parts.join '.'
 			]
 
-		if typeof value is 'object' and value instanceof Reference
-			return value.toJSON()
+		if typeof value is 'object'
+			if isAttr value
+				return resolve value, globals
+
+			if value instanceof Reference
+				return value.toJSON()
 
 		return value

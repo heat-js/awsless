@@ -1,35 +1,49 @@
 
 import Client 			from '../client/cloudformation'
-import { warn }			from '../console'
+import { run }			from '../terminal/task'
+import time				from '../performance/time'
 import stackStatus 		from './stack-status'
 import stackEventsError from './stack-events-error'
 
 export default ({ profile, region, stack }) ->
-	params = { StackName: stack }
-	status = await stackStatus { profile, region, stack }
-	if not status
-		warn 'Stack has already been deleted!'
-		return
+	return run (task) ->
+		elapsed = time()
+		task.setPrefix 'Stack'
+		# task.setName chalk"#{ stack } {gray #{ region }}"
+		task.setName stack
+		task.setContent 'Deleting...'
+		task.addMetadata 'Region', region
 
-	if status.includes 'IN_PROGRESS'
-		throw new Error "Stack is in progress: #{ status }"
+		params = { StackName: stack }
+		status = await stackStatus { profile, region, stack }
+		if not status
+			task.setContent 'Stack has already been deleted!'
+			task.warning()
+			return
 
-	cloudFormation = Client { profile, region }
+		if status.includes 'IN_PROGRESS'
+			task.setContent 'Failed'
+			throw new Error "Stack is in progress: #{ status }"
 
-	result = await cloudFormation.deleteStack params
-		.promise()
-
-	state = if status then 'stackDeleteComplete' else 'stackCreateComplete'
-
-	try
-		await cloudFormation.waitFor 'stackDeleteComplete', params
+		cloudFormation = Client { profile, region }
+		result = await cloudFormation.deleteStack params
 			.promise()
 
-	catch error
-		if error.stack
-			result = await cloudFormation.describeStackEvents params
+		state = if status then 'stackDeleteComplete' else 'stackCreateComplete'
+
+		try
+			await cloudFormation.waitFor 'stackDeleteComplete', params
 				.promise()
 
-			throw new Error stackEventsError result.StackEvents
+		catch error
+			task.setContent 'Failed'
+			if error.stack
+				result = await cloudFormation.describeStackEvents params
+					.promise()
 
-		throw error
+				throw new Error stackEventsError result.StackEvents
+
+			throw error
+
+		task.setContent 'Deleted'
+		task.addMetadata 'Time', elapsed()

@@ -16,8 +16,10 @@ redrivePolicy = (ctx) ->
 
 export default resource (ctx) ->
 
-	name	= ctx.string [ 'Name', 'QueueName' ]
-	events	= ctx.array 'Events', []
+	prefixName	= ctx.string '@Config.PrefixResourceName', ''
+	events		= ctx.array 'Events', []
+	name		= ctx.string [ 'Name', 'QueueName' ]
+	name		= "#{ prefixName }#{ name }"
 
 	for event, index in events
 		event	= { ...event, Postfix: String index }

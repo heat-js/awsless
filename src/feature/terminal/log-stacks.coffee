@@ -83,4 +83,4 @@ multi = (stacks, options) ->
 		compact: true
 	}
 
-	log boxen table.render(), { ...options, padding: { left: 2, right: 2 } }
+	console.log boxen table.render(), { ...options, padding: { left: 2, right: 2 } }

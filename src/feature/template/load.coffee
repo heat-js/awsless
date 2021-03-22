@@ -1,39 +1,11 @@
 
-import fs							from 'fs'
-import path 						from 'path'
-import YAML							from 'js-yaml'
-import { cloudformationTags }		from 'js-yaml-cloudformation-schema'
-import customTypes					from './custom-yaml-types'
-import isDirectory					from '../fs/is-directory'
-
-schema = YAML.Schema.create [
-	...cloudformationTags
-	...customTypes
-]
-
-recursiveReadDir = (directory) ->
-	files = await fs.promises.readdir directory
-
-	return await Promise.all(
-		files.map (file) =>
-			file = path.join directory, file
-			if await isDirectory file
-				return @recursiveReadDir file
-
-			return file
-
-		.flat()
-	)
+import fs			from 'fs'
+import path 		from 'path'
+import parse		from './parse'
+import listFiles	from '../fs/list-files-recursive'
 
 export default (directory) ->
-	try
-		files = await recursiveReadDir directory
-	catch error
-		if error.code is 'ENOENT'
-			throw new Error "AWS template directory doesn't exist '#{ directory }'"
-
-		throw error
-
+	files = await listFiles directory
 	files = files.filter (file) ->
 		extension = path
 			.extname file
@@ -44,10 +16,17 @@ export default (directory) ->
 	if files.length is 0
 		throw new Error "AWS template directory has no template files inside."
 
-	files = await Promise.all files.map (file) ->
-		data = await fs.promises.readFile file
-		return YAML.load data, {
-			schema
-		}
+	template = {}
 
-	return Object.assign {}, ...files
+	await Promise.all files.map (file) ->
+		data = await fs.promises.readFile file
+		data = parse data
+
+		# Check if we find duplicate keys inside our template.
+		for key in Object.keys data
+			if typeof template[ key ] isnt 'undefined'
+				throw new Error "AWS template has a duplicate key for: #{ key }"
+
+		Object.assign template, data
+
+	return template

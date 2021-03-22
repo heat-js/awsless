@@ -9,24 +9,29 @@ import split 			from '../feature/template/split'
 import writeFile 		from '../feature/fs/write-file'
 import removeDirectory 	from '../feature/fs/remove-directory'
 import logStacks		from '../feature/terminal/log-stacks'
-# import { log }			from '../feature/console'
+import { run }			from '../feature/terminal/task'
+import log				from '../feature/terminal/log'
+import runTests			from '../feature/test/run'
 import path 			from 'path'
 import chalk			from 'chalk'
 import util				from 'util'
 import jsonFormat		from 'json-format'
 
-import { run } from '../feature/terminal/task'
-
-import { log, warn, info, err, confirm } from '../feature/console'
-import { localResolvers, remoteResolvers, resources } from '../config'
+import { localResolvers, remoteResolvers, logicalResolvers, resources } from '../config'
 
 export default (options) ->
-
 	try
 
+		# -----------------------------------------------------
+		# Run tests
+
+		if options.test
+			if not await runTests()
+				throw new Error 'Tests failed'
+
+		# -----------------------------------------------------
+		# Load the template files
 		context = await run (task) ->
-			# -----------------------------------------------------
-			# Load the template files
 
 			task.setContent "Loading templates..."
 
@@ -43,6 +48,11 @@ export default (options) ->
 			# Resolve the remote variable resolvers
 
 			template = await resolveVariables template, remoteResolvers
+
+			# -----------------------------------------------------
+			# Resolve the logical resolvers
+
+			template = await resolveVariables template, logicalResolvers
 
 			# -----------------------------------------------------
 			# Parse our custom resources
@@ -73,8 +83,8 @@ export default (options) ->
 		# Show confirm prompt
 
 		if not options.skipPrompt
-			if not await confirm chalk"Are u sure you want to {green deploy} the stack?"
-				warn 'Cancelled.'
+			if not await log.confirm chalk"Are u sure you want to {green deploy} the stack?"
+				log.warning 'Cancelled.'
 				return
 
 		# -----------------------------------------------------
@@ -111,7 +121,7 @@ export default (options) ->
 		stacks = split context
 
 		for stack in stacks
-			stack.template = stringify stack.template
+			stack.template = stringify stack.template, context.globals
 
 		# -----------------------------------------------------
 		# Save a copy of the stack templates in the build
@@ -127,9 +137,8 @@ export default (options) ->
 
 		if options.preview
 			for stack, index in stacks
-				info "Stack #{ index }:"
-				json = JSON.parse stack.template
-				log util.inspect json, false, null, true
+				log.info "Stack #{ index }:"
+				log.object stack.template
 
 		# -----------------------------------------------------
 		# Validate Templates & get the stack capabilities
@@ -149,27 +158,29 @@ export default (options) ->
 		if options.capabilities
 			list = capabilities.flat()
 			if list.length > 0
-				info chalk"{white The stack is using the following capabilities:} #{ list.join ', ' }"
+				log.info chalk"{white The stack is using the following capabilities:} #{ list.join ', ' }"
 			else
-				info chalk.white 'The stack is using no special capabilities'
+				log.info chalk.white 'The stack is using no special capabilities'
 
 		# -----------------------------------------------------
-		# Deploying stack
+		# Deploying stacks
 
 		await context.emitter.emit 'before-deploying-stack'
 
-		await run (task) ->
-			task.setContent "Deploying stack..."
+		# await run (task) ->
+			# task.setContent "Deploying stack..."
 
-			return Promise.all stacks.map (stack) ->
-				return deployStack {
-					stack:			stack.stack
-					profile:		stack.profile
-					region:			stack.region
-					template:		stack.template
-					capabilities:	stack.capabilities
-				}
+		await Promise.all stacks.map (stack) ->
+			return deployStack {
+				stack:			stack.stack
+				profile:		stack.profile
+				region:			stack.region
+				template:		stack.template
+				capabilities:	stack.capabilities
+			}
 
+			# task.setContent chalk.underline.green "Deploying stack..."
+			# success "Stack has successfully been deployed."
 
 		# -----------------------------------------------------
 		# Run events after stack update
@@ -177,6 +188,6 @@ export default (options) ->
 		await context.emitter.emit 'after-deploying-stack'
 
 	catch error
-		err error.message
+		log.error error
 
 	process.exit 0

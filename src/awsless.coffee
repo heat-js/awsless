@@ -15,9 +15,10 @@ program.usage chalk"{blue [command]} {green [options]}"
 program
 	.command 'deploy'
 	.description chalk.cyan 'deploy the stack to AWS'
-	.option '-c, --capabilities', 'output the stack capabilities that are required'
-	.option '-p, --preview', 'preview the stack template'
-	.option '-s, --skip-prompt', 'skip confirmation prompt'
+	.option '-c, --capabilities',	'output the stack capabilities that are required'
+	.option '-p, --preview',		'preview the stack template'
+	.option '-s, --skip-prompt',	'skip confirmation prompt'
+	.option '-t, --test',			'run tests before deploying'
 	.allowUnknownOption()
 	# .allowExcessArguments()
 	.action Deploy
@@ -25,7 +26,7 @@ program
 program
 	.command 'delete'
 	.description chalk.cyan 'delete the stack from AWS'
-	.option '-s, --skip-prompt', 'skip confirmation prompt'
+	.option '-s, --skip-prompt',	'skip confirmation prompt'
 	.allowUnknownOption()
 	# .allowExcessArguments()
 	.action Delete

@@ -10,4 +10,4 @@ export default resource (ctx) ->
 	}
 
 	ctx.on 'beforeStackDeploy', ->
-		ctx.value 'name', ctx.string 'Name'
+		ctx.value 'name', 'lol'

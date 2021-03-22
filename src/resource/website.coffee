@@ -1,10 +1,12 @@
 
 import sync				from '@heat/s3-deploy/sync'
 import path				from 'path'
+import filesize 		from 'filesize'
 import resource 		from '../feature/resource'
 import isDirectory		from '../feature/fs/is-directory'
 import clearCache		from '../feature/cloudfront/clear-cache'
-import { keyval }		from '../feature/console'
+import emptyBucket		from '../feature/s3/empty-bucket'
+# import { keyval }		from '../feature/console'
 import { run }			from '../feature/terminal/task'
 import fetchExports		from '../feature/fetch/exports'
 import time				from '../feature/performance/time'
@@ -21,8 +23,23 @@ formatHostedZoneName = (domain) ->
 
 	return "#{ result.domain }.#{ result.topLevelDomains.join '.' }."
 
+lambdaFunctionAssociations = (ctx) ->
+	events = ctx.array 'LambdaEvents', []
+	if not events.length
+		return {}
+
+	return {
+		LambdaFunctionAssociations: events.map (event, index) -> {
+			EventType:			ctx.string "LambdaEvents.#{ index }.Type"
+			IncludeBody:		ctx.boolean "LambdaEvents.#{ index }.IncludeBody", false
+			LambdaFunctionARN:	ctx.string [ "LambdaEvents.#{ index }.Arn", "LambdaEvents.#{ index }.ARN" ]
+		}
+	}
+
 export default resource (ctx) ->
 
+	region				= ctx.string '@Config.Region'
+	profile				= ctx.string '@Config.Profile'
 	Stack 				= ctx.string '@Config.Stack'
 	DomainName			= ctx.string 'DomainName'
 	BucketName			= ctx.string [ 'BucketName', 'DomainName' ]
@@ -69,7 +86,7 @@ export default resource (ctx) ->
 		Properties: {
 			DistributionConfig: {
 				Enabled: true
-				DefaultRootObject: '/'
+				DefaultRootObject: ctx.string 'DefaultRootObject', '/'
 				Aliases: [ DomainName ]
 				PriceClass: 'PriceClass_All'
 				HttpVersion: 'http2'
@@ -95,6 +112,7 @@ export default resource (ctx) ->
 							Forward: 'none'
 						}
 					}
+					...lambdaFunctionAssociations ctx
 				}
 			}
 		}
@@ -119,7 +137,10 @@ export default resource (ctx) ->
 	# Events before stack deploy
 
 	ctx.on 'validate-resource', ->
-		folder = ctx.string 'Syncing.Folder'
+		folder = ctx.string 'Syncing.Folder', ''
+		if not folder
+			return
+
 		folder = path.join process.cwd(), folder
 
 		if not await isDirectory folder
@@ -129,10 +150,13 @@ export default resource (ctx) ->
 	# Events after stack deploy
 
 	ctx.on 'after-deploying-stack', ->
-		region		= ctx.string '@Config.Region'
-		profile		= ctx.string '@Config.Profile'
-		folder 		= ctx.string 'Syncing.Folder'
-		folder		= path.join process.cwd(), folder
+
+		folder = ctx.string 'Syncing.Folder', ''
+
+		if not folder
+			return
+
+		folder = path.join process.cwd(), folder
 
 		await run (task) ->
 			elapsed = time()
@@ -149,6 +173,7 @@ export default resource (ctx) ->
 				ignoredExtensions:		ctx.array 'Syncing.IgnoreExtensions', []
 				acl:					ctx.string 'ACL', 'public-read'
 				cacheAge:				ctx.number 'CacheAge', 31536000
+				logging: 				false
 			}
 
 			if ctx.boolean 'Syncing.ClearCache', true
@@ -165,30 +190,24 @@ export default resource (ctx) ->
 			task.setContent 'Synced'
 			task.addMetadata 'Time', elapsed()
 
-		# await task(
-		# 	"Syncing s3 bucket: #{ BucketName }"
-		# 	sync {
-		# 		profile
-		# 		region
-		# 		folder
-		# 		bucket:					BucketName
-		# 		ignoredExtensions:		ctx.array 'Syncing.IgnoreExtensions', []
-		# 		acl:					ctx.string 'ACL', 'public-read'
-		# 		cacheAge:				ctx.number 'CacheAge', 31536000
-		# 	}
-		# )
+	# -------------------------------------------------------
+	# Events before stack delete
 
-		# if ctx.boolean 'Syncing.ClearCache', true
-		# 	values			= await fetchExports { profile, region }
-		# 	distributionId	= values[ "#{ Stack }-#{ ctx.name }-DistributionId" ]
-		# 	if distributionId
-		# 		await task(
-		# 			"Clearing cloudfront cache: #{ distributionId }"
-		# 			clearCache {
-		# 				profile
-		# 				region
-		# 				distributionId
-		# 			}
-		# 		)
+	ctx.on 'before-deleting-stack', ->
+		await run (task) ->
+			elapsed = time()
 
-		# keyval "#{ ctx.name } URL", "https://#{ DomainName }"
+			task.setPrefix 'S3 Bucket'
+			task.setName BucketName
+			task.setContent 'Emptying...'
+
+			{ size, count } = await emptyBucket {
+				profile
+				region
+				bucket: BucketName
+			}
+
+			task.setContent 'Emptied'
+			task.addMetadata 'Files', count
+			task.addMetadata 'Size', filesize size
+			task.addMetadata 'Time', elapsed()

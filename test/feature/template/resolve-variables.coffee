@@ -1,11 +1,16 @@
 
 import resolveVariables	from '../../../src/feature/template/resolve-variables'
 import Var				from '../../../src/variable-resolver/var'
+import Attr				from '../../../src/variable-resolver/attr'
+import When				from '../../../src/variable-resolver/when'
+import Attribute		from '../../../src/attribute'
 # import opt				from '../../../src/variable-resolver/var'
 
 describe 'Resolve Variables', ->
 	resolvers = {
-		'var': Var
+		'var':	Var
+		'attr':	Attr
+		'when':	When
 	}
 
 	it 'should resolve simple variables', ->
@@ -19,6 +24,17 @@ describe 'Resolve Variables', ->
 			.toStrictEqual {
 				foo: 'bar'
 				key: 'bar'
+			}
+
+	it 'should resolve attributes', ->
+		template = {
+			key: '${ attr:resource.name }'
+		}
+
+		result = await resolveVariables template, resolvers
+		expect result
+			.toStrictEqual {
+				key: new Attribute 'resource', 'name'
 			}
 
 	it 'should resolve variables in text', ->
@@ -62,8 +78,8 @@ describe 'Resolve Variables', ->
 					'foo'
 					'bar'
 					'foo'
-					{ key: '2' }
-					{ key: '1' }
+					{ key: 2 }
+					{ key: 1 }
 				]
 			}
 
@@ -118,20 +134,20 @@ describe 'Resolve Variables', ->
 				five: 'e-b-c-a'
 			}
 
-	# it 'should resolve structures', ->
-	# 	template = {
-	# 		var1: { prop: true }
-	# 		var2: { prop: '${var:var1}' }
-	# 		var3: '${var:var2}'
-	# 	}
+	it 'should resolve structures', ->
+		template = {
+			var1: { prop: true }
+			var2: { prop: '${var:var1}' }
+			var3: '${var:var2}'
+		}
 
-	# 	result = await resolveVariables template, resolvers
-	# 	expect result
-	# 		.toStrictEqual {
-	# 			var1: { prop: true }
-	# 			var2: { prop: { var1: { prop: true } } }
-	# 			var3: { prop: { var1: { prop: true } } }
-	# 		}
+		result = await resolveVariables template, resolvers
+		expect result
+			.toStrictEqual {
+				var1: { prop: true }
+				var2: { prop: { prop: true } }
+				var3: { prop: { prop: true } }
+			}
 
 	it 'should not resolve native aws variables', ->
 		template = {

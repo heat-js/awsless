@@ -1,18 +1,31 @@
 
 makeRegex = ->
-	return /\$\{ *(([a-z]+)\:([a-z0-9-_/\.:]+)) *\}/gmi
+	return /\$\{ *(([a-z]+)\:([a-z0-9-_/\.\,:]+)) *\}/gmi
+
+# makeFullRegex = ->
+# 	return /^\$\{ *(([a-z]+)\:([a-z0-9-_/\.:]+)) *\}$/gmi
 
 variablesItem = (variableResolvers, variables, key, value, object) ->
 	switch typeof value
 		when 'string'
 			regex = makeRegex()
 			while matches = regex.exec value
-				[ _, match, type, path ] = matches
+				[ string, match, type, path ] = matches
 
 				if not variableResolvers[type]
 					continue
 
-				variables.push { key, object, match, type, path }
+				# console.log 'full', string, value
+				variables.push { key, object, match, type, path, full: string is value }
+
+			# regex = makePartialRegex()
+			# while matches = regex.exec value
+			# 	[ _, match, type, path ] = matches
+
+			# 	if not variableResolvers[type]
+			# 		continue
+
+			# 	variables.push { key, object, match, type, path, full: true }
 
 		when 'object', 'array'
 			findVariables variableResolvers, variables, value
@@ -102,16 +115,24 @@ export default (template, variableResolvers = {}) ->
 	# console.log variables
 
 	for entry in variables
-		entry.object[ entry.key ] = entry.object[ entry.key ].replace regex, (original, match) ->
-			if match isnt entry.match
-				return original
-
-			replacement = replacements[ match ]
+		if entry.full
+			replacement = replacements[ entry.match ]
 			if typeof replacement is 'undefined'
-				errors.push match
-				return original
+				errors.push entry.match
+			else
+				entry.object[ entry.key ] = replacement
 
-			return replacement
+		else
+			entry.object[ entry.key ] = entry.object[ entry.key ].replace regex, (original, match) ->
+				if match isnt entry.match
+					return original
+
+				replacement = replacements[ match ]
+				if typeof replacement is 'undefined'
+					errors.push match
+					return original
+
+				return replacement
 
 		# 		return replacements[ entry.match ]
 

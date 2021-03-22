@@ -23,9 +23,9 @@ filter = (list, defaultRegion, filterRegion) ->
 	return filtered
 
 export default (context) ->
-	stack			= context.string '@Config.Stack'
-	defaultRegion	= context.string '@Config.Region'
-	profile			= context.string '@Config.Profile'
+	stack			= context.string '@Config.Stack',	'stack'
+	defaultRegion	= context.string '@Config.Region',	'us-east-1'
+	profile			= context.string '@Config.Profile',	'default'
 	description		= context.string '@Config.Description', ''
 
 	outputs			= context.getOutputs()

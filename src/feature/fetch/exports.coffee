@@ -1,5 +1,5 @@
 
-import cache			from 'function-cache'
+import cache			from '../utils/function-cache'
 import CloudFormation	from '../client/cloudformation'
 
 export default cache ({ profile, region }) ->

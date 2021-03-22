@@ -1,6 +1,7 @@
 
 import typeOf 		from 'type-of'
 import objectPath 	from 'object-path'
+import { isAttr }	from '../attribute'
 import { isFn }		from './cloudformation/fn'
 
 export default ({ template, resource, properties, paths, type, defaultValue }) ->
@@ -24,8 +25,10 @@ export default ({ template, resource, properties, paths, type, defaultValue }) -
 			continue
 
 		if type and valueType isnt type
-			if type is 'string' and valueType is 'object' and isFn value
+			if type is 'string' and valueType is 'object' and ( isFn(value) or isAttr(value) )
 				return value
+
+			console.log value, value instanceof Attribute
 
 			throw new TypeError "Property \"#{ path }\" isnt a \"#{ type }\"."
 

@@ -1,13 +1,18 @@
 
 import { into } from 'draftlog'
 
-into console
-	.addLineListener process.stdin
+if process.env.NODE_ENV is 'test' or process.env.JEST_WORKER_ID
+	class TerminalLine
+		update: (text) ->
+else
+	into console
+		.addLineListener process.stdin
 
-export default class TerminalLine
+	class TerminalLine
+		constructor: ->
+			@draft = console.draft()
 
-	constructor: ->
-		@draft = console.draft()
+		update: (text) ->
+			@draft text
 
-	update: (text) ->
-		@draft text
+export default TerminalLine

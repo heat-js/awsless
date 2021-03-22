@@ -1,0 +1,9 @@
+
+type Post {
+	title: String!
+	content: String!
+}
+
+type Query {
+	posts: [ Post ]!
+}

@@ -1,10 +1,11 @@
 
-import AWS from 'aws-sdk'
+import AWS			from 'aws-sdk'
+import Credentials	from './credentials'
 
 export default ({ profile, region }) ->
 
 	return new AWS.CloudFront {
 		apiVersion: '2019-03-26'
-		credentials: new AWS.SharedIniFileCredentials { profile }
+		credentials: Credentials { profile }
 		region
 	}

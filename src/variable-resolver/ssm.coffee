@@ -13,77 +13,51 @@ export default (paths, root) ->
 		return parameters[ path ]
 
 # export default (paths, root) ->
-# 	profile			= root.Config.Profile
-# 	defaultRegion 	= root.Config.Region
+# 	ordered = []
+# 	reqions = {}
 
-# 	list = {}
+# 	for path in paths
+# 		parts = path.split ':'
+# 		switch parts.length
+# 			when 1
+# 				region	= root.Config.Region
+# 				path	= parts[0]
+# 			when 2
+# 				[ region, path ] = parts
+# 			else
+# 				throw new Error "Invalid ssm value: #{ path }"
 
-# 	for path, index in paths
-# 		data = path.split ':'
-# 		if data.length is 1
-# 			path	= data[0]
-# 			region	= defaultRegion
-# 		else
-# 			path	= data[1]
-# 			region	= data[0]
-
-# 		if entries = list[ region ]
-# 			entries.push path
-# 		else
-# 			list[ region ] = [ path ]
-
-# 	results = {}
-# 	for region, paths of list
-# 		parameters = await fetchSsm { paths, profile, region }
-# 		return parameters[ path ]
-
-
-# 	paths = paths.map (path) ->
-# 		data = path.split ':'
-# 		if data.length is 1
-# 			return {
-# 				path:	data[0]
-# 				region
-# 			}
-
-# 		return {
-# 			path:	data[1]
-# 			region: data[0]
+# 		ordered.push {
+# 			region
+# 			path
 # 		}
 
-# 	return Promise.all paths.map ({ path, region }) ->
-# 		parameters = await fetchSsm { paths, profile, region }
-# 		return parameters[ path ]
+# 		if not list = reqions[ region ]
+# 			list = reqions[ region ] = [ ]
 
+# 		list.push path
 
-# 	parameters = await fetchSsm {
-# 		paths
-# 		profile:	root.Config.Profile
-# 		region:		root.Config.Region
-# 	}
-
-# 	return paths.map (path) ->
-# 		return parameters[ path ]
-
-# import fetchExports	from '../feature/fetch/exports'
-
-# export default (names, root) ->
-# 	profile = root.Config.Profile
-# 	region 	= root.Config.Region
-
-# 	names = names.map (name) ->
-# 		data = name.split ':'
-# 		if data.length is 1
-# 			return {
-# 				name:	data[0]
-# 				region
-# 			}
-
-# 		return {
-# 			name:	data[1]
-# 			region: data[0]
+# 	await Promise.all Object.keys(reqions).map (reqion) ->
+# 		parameters = await fetchSsm {
+# 			region
+# 			paths:		reqions[ region ]
+# 			profile:	root.Config.Profile
 # 		}
 
-# 	return Promise.all names.map ({ name, region }) ->
-# 		data = await fetchExports { profile, region }
-# 		return data[ name ]
+# 		console.log 'reqion', reqion
+# 		console.log 'paths', reqions[ region ]
+# 		# console.log 'parameters', parameters
+
+# 		for path, value of parameters
+# 			item = ordered.find (item) ->
+# 				return item.region is region and item.path is path
+
+# 			console.log item, value
+
+# 			item.value = value
+
+# 	console.log reqions
+# 	console.log ordered
+
+# 	return ordered.map ({ value }) ->
+# 		return value

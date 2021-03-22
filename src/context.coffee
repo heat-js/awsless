@@ -12,6 +12,7 @@ export default class Context
 		@template	= {}
 		@outputs	= {}
 		@resources	= {}
+		@globals	= {}
 		@emitter
 	}) ->
 		@refs = {}
@@ -33,6 +34,16 @@ export default class Context
 	getOutputs: ->
 		return @outputs
 
+	setAttribute: (name, attr, value) ->
+		@globals[ "attr-#{ name }-#{ attr }" ] = value
+
+		# ref = @ref "attr-#{ name }.#{ attr }"
+		# ref.setValue value
+		# return @
+
+	# getAttribute: (name, attr) ->
+	# 	return @ref "attr-#{ name }.#{ attr }"
+
 	addResource: (name, resource) ->
 		@resources[name] = resource
 
@@ -43,7 +54,7 @@ export default class Context
 		return @refs[ key ] or ( @refs[ key ] = new Reference )
 
 	value: (key, value) ->
-		ref = @refs[ key ]
+		ref = @ref key
 		ref.setValue value
 
 	singleton: (key, value) ->
@@ -56,6 +67,7 @@ export default class Context
 			@template
 			@outputs
 			@emitter
+			@globals
 			name
 			resource
 		}

@@ -1,0 +1,16 @@
+
+Api:
+  Type: Awsless::Appsync::Api
+  Properties:
+    Name: test-api
+    SourceFiles: src/appsync
+    MappingTemplates: src/appsync/mapping-templates
+    AuthenticationType: AMAZON_COGNITO_USER_POOLS
+    UserPoolConfig:
+      UserPoolId: !ssm auth/user-pool-id
+
+- Type: Mutation
+  Field: tip
+  Lambda: tip__rain
+  Request: templates/request-with-user-info.vtl
+  Response: templates/response.vtl

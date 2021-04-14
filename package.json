@@ -1,6 +1,6 @@
 {
 	"name": "@heat/awsless",
-	"version": "0.0.427",
+	"version": "0.0.428",
 	"license": "MIT",
 	"bin": {
 		"awsless": "./awsless.js"

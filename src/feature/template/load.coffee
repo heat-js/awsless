@@ -21,6 +21,7 @@ export default (directory) ->
 	await Promise.all files.map (file) ->
 		data = await fs.promises.readFile file
 		data = parse data
+		data = data or {}
 
 		# Check if we find duplicate keys inside our template.
 		for key in Object.keys data

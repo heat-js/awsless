@@ -6,17 +6,10 @@ import { run }			from '../terminal/task'
 import time				from '../performance/time'
 # import chalk			from 'chalk'
 
-export default ({ profile, region, stack, template, capabilities = [] }) ->
+export default ({ profile, region, stack, templateBody, templateUrl, capabilities = [] }) ->
 
 	elapsed = time()
 	cloudFormation = Client { profile, region }
-
-	params = {
-		StackName: stack
-		TemplateBody: template
-		Capabilities: capabilities
-		Tags: [ { Key: 'Stack', Value: stack } ]
-	}
 
 	return run (task) ->
 		task.setPrefix 'Stack'
@@ -24,6 +17,17 @@ export default ({ profile, region, stack, template, capabilities = [] }) ->
 		task.setName stack
 		task.setContent 'Deploying...'
 		task.addMetadata 'Region', region
+
+		params = {
+			StackName: stack
+			Capabilities: capabilities
+			Tags: [ { Key: 'Stack', Value: stack } ]
+		}
+
+		if templateUrl
+			params.TemplateURL = templateUrl
+		else
+			params.TemplateBody = templateBody
 
 		status = await stackStatus { profile, region, stack }
 		exists = !!status

@@ -6,6 +6,7 @@ import stringify		from '../feature/template/stringify'
 import deployStack		from '../feature/cloudformation/deploy-stack'
 import validateTemplate	from '../feature/cloudformation/validate-template'
 import split 			from '../feature/template/split'
+import uploadTemplate 	from '../feature/template/upload'
 import writeFile 		from '../feature/fs/write-file'
 import removeDirectory 	from '../feature/fs/remove-directory'
 import logStacks		from '../feature/terminal/log-stacks'
@@ -121,7 +122,7 @@ export default (options) ->
 		stacks = split context
 
 		for stack in stacks
-			stack.template = stringify stack.template, context.globals
+			stack.templateBody = stringify stack.templateBody, context.globals
 
 		# -----------------------------------------------------
 		# Save a copy of the stack templates in the build
@@ -129,7 +130,7 @@ export default (options) ->
 
 		for stack in stacks
 			file = path.join cloudformationDir, "#{ stack.stack }.#{ stack.region }.json"
-			json = JSON.parse stack.template
+			json = JSON.parse stack.templateBody
 			await writeFile file, jsonFormat json
 
 		# -----------------------------------------------------
@@ -139,6 +140,17 @@ export default (options) ->
 			for stack, index in stacks
 				log.info "Stack #{ index }:"
 				log.object stack.template
+
+		# -----------------------------------------------------
+		# Upload Stack
+
+		await context.emitter.emit 'before-upload-stack'
+
+		await run (task) ->
+			task.setContent 'Uploading templates...'
+
+			return Promise.all stacks.map (stack) ->
+				stack.templateUrl = await uploadTemplate stack
 
 		# -----------------------------------------------------
 		# Validate Templates & get the stack capabilities
@@ -175,7 +187,8 @@ export default (options) ->
 				stack:			stack.stack
 				profile:		stack.profile
 				region:			stack.region
-				template:		stack.template
+				templateUrl:	stack.templateUrl
+				templateBody:	stack.templateBody
 				capabilities:	stack.capabilities
 			}
 

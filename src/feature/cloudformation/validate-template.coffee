@@ -1,12 +1,11 @@
 
 import Client from '../client/cloudformation'
 
-export default ({ profile, region, template }) ->
+export default ({ profile, region, templateBody, templateUrl }) ->
 
 	cloudFormation = await Client { profile, region }
-	result = await cloudFormation.validateTemplate {
-		TemplateBody: template
-	}
-	.promise()
+	params = if templateUrl then { TemplateURL: templateUrl } else { TemplateBody: templateBody }
+	result = await cloudFormation.validateTemplate params
+		.promise()
 
 	return result.Capabilities

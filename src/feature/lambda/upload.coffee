@@ -9,6 +9,7 @@ import { createReadStream }	from 'fs'
 # import { task, warn }		from '../console'
 import { run }				from '../terminal/task'
 import time					from '../performance/time'
+import uploadSourceMap		from '../bugsnag/upload-source-map'
 import filesize 			from 'filesize'
 import chalk				from 'chalk'
 import createChecksum		from 'hash-then'
@@ -68,7 +69,7 @@ getObject = ({ region, profile, bucket, key }) ->
 		version:	result.VersionId
 	}
 
-export default ({ profile, region, bucket, name, stack, handle, externals = [], files = {} }) ->
+export default ({ profile, region, bucket, name, stack, handle, externals = [], files = {}, bugsnagApiKey }) ->
 
 	root = process.cwd()
 
@@ -80,8 +81,8 @@ export default ({ profile, region, bucket, name, stack, handle, externals = [], 
 	uncompPath		= path.join outputPath, 'uncompressed'
 	compPath		= path.join outputPath, 'compressed'
 
-	uncompFile		= path.join uncompPath, 'index.js'
-	compFile		= path.join compPath,	'index.js'
+	uncompFile		= path.join uncompPath, "#{ name }.js"
+	compFile		= path.join compPath,	"#{ name }.js"
 	uncompZipFile	= path.join uncompPath, 'index.zip'
 	zipFile 		= path.join compPath,	'index.zip'
 	key				= "#{ stack }/#{ name }.zip"
@@ -106,7 +107,7 @@ export default ({ profile, region, bucket, name, stack, handle, externals = [], 
 			task.setContent 'Unchanged'
 			task.addMetadata 'Time', elapsed()
 
-			return { key, checksum, hash: object.metadata.hash, version: object.version }
+			return { key, checksum, hash: object.metadata.hash, version: object.version, changed: false }
 
 		task.setContent 'Building...'
 
@@ -120,7 +121,7 @@ export default ({ profile, region, bucket, name, stack, handle, externals = [], 
 
 		s3 = Client { profile, region }
 
-		task.setContent 'Uploading...'
+		task.setContent 'Uploading to S3...'
 		task.addMetadata 'Size', filesize size
 
 		result = await s3.putObject {
@@ -136,10 +137,17 @@ export default ({ profile, region, bucket, name, stack, handle, externals = [], 
 		}
 		.promise()
 
+		if bugsnagApiKey
+			task.setContent 'Uploading source map to Bugsnag...'
+			await task.uploadSourceMap {
+				apiKey: bugsnagApiKey
+				name
+			}
+
 		task.setContent 'Uploaded to S3'
 		task.addMetadata 'Time', elapsed()
 
-		return { key, checksum, hash, version: result.VersionId }
+		return { key, checksum, hash, version: result.VersionId, changed: true }
 
 
 

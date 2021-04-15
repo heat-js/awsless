@@ -19,6 +19,7 @@ program
 	.option '-p, --preview',		'preview the stack template'
 	.option '-s, --skip-prompt',	'skip confirmation prompt'
 	.option '-t, --test',			'run tests before deploying'
+	.option '-d, --debug',			'show the full error stack trace'
 	.allowUnknownOption()
 	# .allowExcessArguments()
 	.action Deploy
@@ -27,6 +28,7 @@ program
 	.command 'delete'
 	.description chalk.cyan 'delete the stack from AWS'
 	.option '-s, --skip-prompt',	'skip confirmation prompt'
+	.option '-d, --debug',			'show the full error stack trace'
 	.allowUnknownOption()
 	# .allowExcessArguments()
 	.action Delete

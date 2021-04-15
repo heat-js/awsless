@@ -17,6 +17,7 @@ export default (folder, output, options = {}) ->
 	files = files.filter (file) ->
 		return switch path.extname file
 			when '.txt' then false
+			when '.map' then false
 			else true
 
 	zip = new JSZip

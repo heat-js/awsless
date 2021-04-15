@@ -3,6 +3,7 @@ import chalk	from 'chalk'
 import Confirm	from 'prompt-confirm'
 import symbols	from 'log-symbols'
 import util 	from 'util'
+import options	from './options'
 
 log = (...args) ->
 	console.log ...args
@@ -22,10 +23,14 @@ export default {
 		return @
 
 	error: (message) ->
-		if message instanceof Error
-			{ message } = message
+		if options.debug
+			console.error message
+		else
+			if message instanceof Error
+				{ message } = message
 
-		log chalk.red "#{ symbols.error } #{ message }"
+			log chalk.red "#{ symbols.error } #{ message }"
+
 		return @
 
 	info: (message) ->

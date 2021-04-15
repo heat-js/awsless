@@ -63,11 +63,19 @@ environmentVariables = (ctx) ->
 	if ctx.boolean [ 'RemoveEnv', '@Config.Lambda.RemoveEnv' ], false
 		return {}
 
+	defaultVars = {
+		AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+		AWS_ACCOUNT_ID:	Ref 'AWS::AccountId'
+	}
+
+	BUGSNAG_API_KEY = ctx.string [ 'Bugsnag.ApiKey', '@Config.Bugsnag.ApiKey' ], ''
+	if BUGSNAG_API_KEY
+		defaultVars = { ...defaultVars, BUGSNAG_API_KEY }
+
 	return {
 		Environment: {
 			Variables: {
-				AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
-				AWS_ACCOUNT_ID:	Ref 'AWS::AccountId'
+				...defaultVars
 				...ctx.object [ '@Config.Lambda.Env', '@Config.Lambda.ENV' ], {}
 				...ctx.object [ 'Env', 'ENV' ], {}
 			}
@@ -80,19 +88,20 @@ export default resource (ctx) ->
 	region		= ctx.string [ '#Region',	'@Config.Region' ]
 	profile		= ctx.string [ '#Profile',	'@Config.Profile' ]
 
-	bucket		= ctx.string [ 'DeploymentBucket', '@Config.Lambda.DeploymentBucket' ]
-	prefixName	= ctx.string '@Config.PrefixResourceName', ''
-	name		= ctx.string [ 'Name', 'FunctionName' ]
-	name		= "#{ prefixName }#{ name }"
-	handle		= ctx.string 'Handle'
-	role		= ctx.string [ 'Role', '@Config.Lambda.Role' ], ''
-	layers		= ctx.array [ 'Layers', '@Config.Lambda.Layers' ], []
-	logging		= ctx.boolean [ 'Logging', '@Config.Lambda.Logging' ], false
-	warmer		= ctx.boolean [ 'Warmer', '@Config.Lambda.Warmer' ], false
-	events		= ctx.array 'Events', []
-	externals	= ctx.array [ 'Externals', '@Config.Lambda.Externals' ], []
-	files		= ctx.object [ 'Files',	'@Config.Lambda.Files' ], {}
-	asyncConfig	= ctx.object [ 'Async', '@Config.Lambda.Async' ], {}
+	bucket			= ctx.string [ 'DeploymentBucket', '@Config.Lambda.DeploymentBucket', '@Config.DeploymentBucket' ]
+	prefixName		= ctx.string '@Config.PrefixResourceName', ''
+	name			= ctx.string [ 'Name', 'FunctionName' ]
+	name			= "#{ prefixName }#{ name }"
+	handle			= ctx.string 'Handle'
+	role			= ctx.string [ 'Role', '@Config.Lambda.Role' ], ''
+	layers			= ctx.array [ 'Layers', '@Config.Lambda.Layers' ], []
+	logging			= ctx.boolean [ 'Logging', '@Config.Lambda.Logging' ], false
+	warmer			= ctx.boolean [ 'Warmer', '@Config.Lambda.Warmer' ], false
+	events			= ctx.array 'Events', []
+	externals		= ctx.array [ 'Externals', '@Config.Lambda.Externals' ], []
+	files			= ctx.object [ 'Files',	'@Config.Lambda.Files' ], {}
+	asyncConfig		= ctx.object [ 'Async', '@Config.Lambda.Async' ], {}
+	bugsnagApiKey	= ctx.string [ 'Bugsnag.ApiKey', '@Config.Bugsnag.ApiKey' ], ''
 
 	# versionedArnExportName		= ctx.object [ 'Async', '@Config.Lambda.Async' ], {}
 
@@ -154,8 +163,16 @@ export default resource (ctx) ->
 		dir = path.join process.cwd(), '.awsless', 'lambda'
 		await removeDirectory dir
 
+	# ctx.on 'after-deploying-stack', ->
+	# 	bugsnagApiKey = ctx.string [ 'Bugsnag.ApiKey', '@Config.Bugsnag.ApiKey' ]
+	# 	if bugsnagApiKey and ctx.getAttribute ctx.name, 'Changed'
+	# 		await uploadSourceMap {
+	# 			apiKey: bugsnagApiKey
+	# 			name
+	# 		}
+
 	ctx.on 'prepare-resource', ->
-		{ key, checksum, hash, version } = await uploadLambda {
+		{ key, checksum, hash, version, changed } = await uploadLambda {
 			stack
 			profile
 			region
@@ -164,6 +181,7 @@ export default resource (ctx) ->
 			name
 			externals
 			files
+			bugsnagApiKey
 		}
 
 		# checksum = createChecksum checksum, policyChecksum ctx
@@ -178,6 +196,7 @@ export default resource (ctx) ->
 			}
 		}
 
+		ctx.setAttribute ctx.name, 'Changed',		changed
 		ctx.setAttribute ctx.name, 'Version',		GetAtt "#{ ctx.name }Version#{ checksum }", 'Version'
 		ctx.setAttribute ctx.name, 'VersionedArn',	Ref "#{ ctx.name }Version#{ checksum }"
 
@@ -191,7 +210,7 @@ export default resource (ctx) ->
 					S3ObjectVersion:	version
 				}
 				FunctionName:	name
-				Handler:		"index#{ path.extname handle }"
+				Handler:		"#{ name }#{ path.extname handle }"
 				Role:			role or GetAtt 'LambdaPolicyIamRole', 'Arn'
 				MemorySize:		ctx.number [ 'MemorySize', '@Config.Lambda.MemorySize' ], 128
 				Runtime:		ctx.string [ 'Runtime', '@Config.Lambda.Runtime' ], 'nodejs12.x'

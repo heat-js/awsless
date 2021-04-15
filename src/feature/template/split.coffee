@@ -23,10 +23,11 @@ filter = (list, defaultRegion, filterRegion) ->
 	return filtered
 
 export default (context) ->
-	stack			= context.string '@Config.Stack',	'stack'
-	defaultRegion	= context.string '@Config.Region',	'us-east-1'
-	profile			= context.string '@Config.Profile',	'default'
-	description		= context.string '@Config.Description', ''
+	stack			= context.string '@Config.Stack',				'stack'
+	defaultRegion	= context.string '@Config.Region',				'us-east-1'
+	profile			= context.string '@Config.Profile',				'default'
+	bucket			= context.string '@Config.DeploymentBucket',	''
+	description		= context.string '@Config.Description',			''
 
 	outputs			= context.getOutputs()
 	resources		= context.getResources()
@@ -44,9 +45,10 @@ export default (context) ->
 		return {
 			name: stack
 			stack
+			bucket
 			region
 			profile
-			template: {
+			templateBody: {
 				AWSTemplateFormatVersion: '2010-09-09'
 				Description:	description
 				Resources:		filter resources, defaultRegion, region

@@ -45,6 +45,7 @@ export default resource (ctx) ->
 	BucketName			= ctx.string [ 'BucketName', 'DomainName' ]
 	HostedZoneId		= ctx.string 'HostedZoneId', 'Z2FDTNDATAQYW2'
 	HostedZoneName		= formatHostedZoneName DomainName
+	Aliases				= ctx.array 'Aliases', []
 	AcmCertificateArn	= ctx.string 'Certificate', ''
 
 	# -------------------------------------------------------
@@ -78,6 +79,22 @@ export default resource (ctx) ->
 		}
 	}
 
+	for _, index in Aliases
+		alias = ctx.string "Aliases.#{ index }"
+
+		ctx.addResource "#{ ctx.name }Alias#{ index }Route53Record", {
+			Type: 'AWS::Route53::RecordSet'
+			Properties: {
+				HostedZoneName
+				Name: "#{ alias }."
+				Type: 'A'
+				AliasTarget: {
+					DNSName: GetAtt "#{ ctx.name }CloudFrontDistribution", 'DomainName'
+					HostedZoneId
+				}
+			}
+		}
+
 	# -------------------------------------------------------
 	# Make the cloudfront distribution
 
@@ -86,8 +103,8 @@ export default resource (ctx) ->
 		Properties: {
 			DistributionConfig: {
 				Enabled: true
-				DefaultRootObject: ctx.string 'DefaultRootObject', '/'
-				Aliases: [ DomainName ]
+				DefaultRootObject: ctx.string 'IndexDocument', 'index.html'
+				Aliases: [ DomainName, ...Aliases ]
 				PriceClass: 'PriceClass_All'
 				HttpVersion: 'http2'
 				ViewerCertificate: {

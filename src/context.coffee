@@ -41,8 +41,8 @@ export default class Context
 		# ref.setValue value
 		# return @
 
-	# getAttribute: (name, attr) ->
-	# 	return @ref "attr-#{ name }.#{ attr }"
+	getAttribute: (name, attr) ->
+		return @globals[ "attr-#{ name }-#{ attr }" ]
 
 	addResource: (name, resource) ->
 		@resources[name] = resource

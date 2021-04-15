@@ -8,7 +8,7 @@ export default resource (ctx) ->
 	region		= ctx.string [ '#Region',	'@Config.Region' ]
 	profile		= ctx.string [ '#Profile',	'@Config.Profile' ]
 
-	bucket		= ctx.string [ 'DeploymentBucket', '@Config.Lambda.DeploymentBucket' ]
+	bucket		= ctx.string [ 'DeploymentBucket', '@Config.Lambda.DeploymentBucket', '@Config.DeploymentBucket' ]
 	name		= ctx.string [ 'Name', 'LayerName' ]
 	description	= ctx.string 'Description', ''
 	runtimes	= ctx.array [ 'Runtimes', 'CompatibleRuntimes' ], []

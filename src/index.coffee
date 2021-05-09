@@ -16,7 +16,7 @@ export load = (path, { resolveLocalResolvers = true, resolveRemoteResolvers = tr
 
 	context = await resolveResources template, resources
 
-	return split( context ).map (stack) ->
-		return Object.assign {
-			template: stringify stack.template, context.globals
-		}, stack
+	return split( context ).map (stack) -> {
+		...stack
+		templateBody: stringify stack.templateBody, context.globals
+	}

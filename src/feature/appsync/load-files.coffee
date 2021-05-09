@@ -3,6 +3,7 @@ import { mergeTypeDefs }	from '@graphql-tools/merge'
 import { parse }			from 'graphql/language'
 import listFiles			from '../fs/list-files-recursive'
 import parseTemplate		from '../template/parse'
+import checksum				from '../crypto/checksum'
 import path 				from 'path'
 import fs 					from 'fs'
 import capitalize			from 'capitalize'
@@ -36,6 +37,19 @@ getTemplate = (templates, key) ->
 		return template
 
 	throw new Error "Appsync mapping template not found: #{ key }"
+
+getDataSource = (item) ->
+	if item.Lambda
+		return {
+			type:	'lambda'
+			key:	checksum JSON.stringify { lambda: item.Lambda }
+			value:	item.Lambda
+		}
+
+	return {
+		type: 'none'
+		key: 'none'
+	}
 
 export default (sourceFiles, mappingTemplates) ->
 	try
@@ -93,12 +107,11 @@ export default (sourceFiles, mappingTemplates) ->
 					capitalize item.Type
 					capitalize item.Field
 				].join ''
-
-				type:		item.Type
-				field:		item.Field
-				lambda:		item.Lambda
-				request:	getTemplate templates, item.Request
-				response:	getTemplate templates, item.Response
+				type:			item.Type
+				field:			item.Field
+				request:		getTemplate templates, item.Request
+				response:		getTemplate templates, item.Response
+				dataSource:		getDataSource item
 			}
 
 	for resolver in resolvers

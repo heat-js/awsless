@@ -1,4 +1,8 @@
 
+type SearchQuery {
+	posts: [ Post ]!
+}
+
 type Post {
 	title: String!
 	content: String!
@@ -6,4 +10,5 @@ type Post {
 
 type Query {
 	posts: [ Post ]!
+	search: SearchQuery!
 }

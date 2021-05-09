@@ -5,8 +5,8 @@
 .serverless
 
 # JavaScript
-*.js
-src/*.js
+# *.js
+# src/*.js
 bin/*.js
 config/*.js
 

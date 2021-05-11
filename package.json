@@ -1,6 +1,6 @@
 {
 	"name": "@heat/awsless",
-	"version": "0.0.467",
+	"version": "0.0.468",
 	"license": "MIT",
 	"bin": {
 		"awsless": "./awsless.js"
@@ -58,6 +58,8 @@
 		"promise-queue": "^2.2.5",
 		"prompt-confirm": "^2.0.4",
 		"rimraf": "^3.0.2",
+		"rollup": "^2.47.0",
+		"rollup-plugin-coffee-script": "^2.0.0",
 		"stream-to-buffer": "^0.1.0",
 		"terser-webpack-plugin": "^5.0.3",
 		"threads": "^1.6.3",

@@ -30,7 +30,8 @@ export default ({ profile, region, stack, templateBody, templateUrl, capabilitie
 			params.TemplateBody = templateBody
 
 		status = await stackStatus { profile, region, stack }
-		exists = !!status
+		exists = !(not status or status is 'ROLLBACK_COMPLETE')
+
 		if not exists
 			result = await cloudFormation.createStack {
 				...params

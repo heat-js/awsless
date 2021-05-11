@@ -12,20 +12,34 @@ const webpackOptions = {
 		// Turn off size warnings for entry points
 		hints: false,
 	},
+	optimization: {
+		runtimeChunk: true,
+		minimizer: [
+			new TerserPlugin({
+				parallel: true,
+				terserOptions: {
+					dead_code: true,
+					output: {
+						comments: true,
+					},
+				},
+			}),
+		],
+	},
 	module: {
-		strictExportPresence: true,
+		strictExportPresence: false,
 		rules: [
-			// {
-			// 	loader: require.resolve('coffee-loader'),
-			// 	test: /\.coffee$/,
-			// 	options: {
-			// 		bare: true
-			// 	}
-			// },
 			{
-				loader: require.resolve('node-loader'),
-				test: /\.node$/,
+				loader: require.resolve('coffee-loader'),
+				test: /\.coffee$/,
+				options: {
+					bare: true
+				}
 			},
+			// {
+			// 	loader: require.resolve('node-loader'),
+			// 	test: /\.node$/,
+			// },
 		],
 	},
 	resolve: {
@@ -44,9 +58,11 @@ expose({
 		return new Promise(function(resolve, reject) {
 			const compiler = webpack(Object.assign({}, webpackOptions, {
 				entry:	inputFile,
-				mode:	options.minimize ? 'development' : 'production',
+				mode:	options.minimize ? 'production' : 'development',
 				// devtool: false,
-
+				optimization: {
+					minimize: false //options.minimize,
+				},
 				externals: [
 					'aws-sdk',
 					...options.externals,
@@ -54,7 +70,9 @@ expose({
 				output: {
 					path:							path.dirname(outputFile),
 					filename:						path.basename(outputFile),
-					// libraryTarget: 					'this',
+					libraryTarget:					'var',
+					library: 						'handler',
+					// chunkFormat:					'push-array',
 					// globalObject:					'this',
   					// libraryExport: 					'handler',
 					// strictModuleExceptionHandling:	true,

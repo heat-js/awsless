@@ -6,6 +6,10 @@ export default class Emitter
 		@keys = []
 
 	on: (eventName, callback) ->
+		if Array.isArray eventName
+			return eventName.map (name) =>
+				@on name, callback
+
 		list = @events[ eventName ]
 		if not list
 			list = @events[ eventName ] = []
@@ -13,6 +17,10 @@ export default class Emitter
 		list.push callback
 
 	once: (key, eventName, callback) ->
+		# if Array.isArray eventName
+		# 	return eventName.map (name) =>
+		# 		@on name, callback
+
 		key = "#{ key }-#{ eventName }"
 
 		if @keys.includes key

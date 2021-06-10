@@ -166,7 +166,7 @@ export default resource (ctx) ->
 	# -------------------------------------------------------
 	# Events after stack deploy
 
-	ctx.on 'after-deploying-stack', ->
+	ctx.on [ 'after-deploying-stack', 'sync' ], ->
 
 		folder = ctx.string 'Syncing.Folder', ''
 

@@ -5,6 +5,7 @@ import { Command } 	from 'commander'
 import chalk		from 'chalk'
 import Deploy		from './command/deploy'
 import Delete		from './command/delete'
+import Sync			from './command/sync'
 import packageData	from './package.json'
 
 program = new Command
@@ -32,5 +33,14 @@ program
 	.allowUnknownOption()
 	# .allowExcessArguments()
 	.action Delete
+
+program
+	.command 'sync'
+	.description chalk.cyan 'sync to AWS S3'
+	.option '-s, --skip-prompt',	'skip confirmation prompt'
+	.option '-d, --debug',			'show the full error stack trace'
+	.allowUnknownOption()
+	# .allowExcessArguments()
+	.action Sync
 
 program.parse process.argv

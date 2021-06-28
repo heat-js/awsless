@@ -1,6 +1,6 @@
 {
 	"name": "@heat/awsless",
-	"version": "0.1.5",
+	"version": "0.1.6",
 	"license": "MIT",
 	"bin": {
 		"awsless": "./awsless.js"
@@ -50,7 +50,7 @@
 		"json-format": "^1.0.1",
 		"jszip": "^3.5.0",
 		"length-stream": "^0.1.1",
-		"log-symbols": "^5.0.0",
+		"log-symbols": "^4.1.0",
 		"minimist": "^1.2.5",
 		"mkdirp": "^1.0.4",
 		"node-loader": "^1.0.2",

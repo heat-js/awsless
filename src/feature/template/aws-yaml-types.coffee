@@ -26,6 +26,7 @@ customType = (name, kind) ->
 export default [
 	customType 'Base64',		'mapping'
 	customType 'ImportValue',	'mapping'
+
 	customType 'Ref',			'scalar'
 	customType 'Sub',			'scalar'
 	customType 'GetAZs',		'scalar'
@@ -33,6 +34,7 @@ export default [
 	customType 'Condition',		'scalar'
 	customType 'ImportValue',	'scalar'
 	customType 'Cidr',			'scalar'
+
 	customType 'And',			'sequence'
 	customType 'Equals',		'sequence'
 	customType 'GetAtt',		'sequence'

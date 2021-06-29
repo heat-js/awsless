@@ -34,3 +34,10 @@ describe 'Template Load', ->
 		await expect load path.join dir, 'unknown'
 			# .rejects.toThrow "AWS template directory doesn't exist"
 			.rejects.toThrow "AWS template directory has no template files inside"
+
+	it 'should handle aws yaml types correctly', ->
+		result = await load path.join dir, 'aws/config.yml'
+		expect result.Config.Lambda.Env.AWS_ACCOUNT_ID
+			.toStrictEqual {
+				Ref: 'AWS::AccountId'
+			}

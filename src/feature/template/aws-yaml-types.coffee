@@ -1,26 +1,27 @@
 
 import YAML	from 'js-yaml'
 
-class Model
+# class Model
 
 customType = (name, kind) ->
 	return new YAML.Type "!#{ name }", {
 		kind
-		instanceOf: Model
+		instanceOf: Object
 		construct: (data) ->
-			model = new Model
-			model._data = data
+			object = {}
+			# model = new Model
+			# model._data = data
 
 			prefix = if name is 'Ref' then '' else 'Fn::'
-			model["#{ prefix }#{ name }"] = switch kind
+			object["#{ prefix }#{ name }"] = switch kind
 				when 'scalar'	then data
 				when 'sequence'	then data or []
 				when 'mapping'	then data or {}
 
-			return model
+			return object
 
-		represent: (model) ->
-			return model._data
+		# represent: (model) ->
+		# 	return model._data
 	}
 
 export default [

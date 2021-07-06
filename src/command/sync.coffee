@@ -13,6 +13,8 @@ import logStacks		from '../feature/terminal/log-stacks'
 import { run }			from '../feature/terminal/task'
 import log				from '../feature/terminal/log'
 import runTests			from '../feature/test/run'
+import say				from '../feature/sound/say'
+# import { playSuccess, playError }	from '../feature/sound'
 import path 			from 'path'
 import chalk			from 'chalk'
 # import util				from 'util'
@@ -103,7 +105,20 @@ export default (options) ->
 		# 4
 		await context.emitter.emit 'after-sync'
 
+		# -----------------------------------------------------
+		# play success sound
+
+		# await playSuccess()
+		say "The #{ stacks[ 0 ].stack } service has been synced."
+
 	catch error
+
 		log.error error
+
+		# -----------------------------------------------------
+		# play error sound
+
+		# await playError()
+		say "An error occurred syncing the #{ stacks[ 0 ].stack } service."
 
 	process.exit 0

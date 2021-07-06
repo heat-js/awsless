@@ -64,6 +64,8 @@ expose({
 				},
 				externals: [
 					'aws-sdk',
+					/^(aws\-sdk\/.*)$/i,
+					// '@aws-ask/client-dynamodb',
 					...options.externals,
 				],
 				output: {

@@ -19,6 +19,7 @@ program
 	.option '-c, --capabilities',	'output the stack capabilities that are required'
 	.option '-p, --preview',		'preview the stack template'
 	.option '-s, --skip-prompt',	'skip confirmation prompt'
+	.option '-m, --mute',			'mute sound effects'
 	.option '-t, --test',			'run tests before deploying'
 	.option '-d, --debug',			'show the full error stack trace'
 	.allowUnknownOption()
@@ -29,6 +30,7 @@ program
 	.command 'delete'
 	.description chalk.cyan 'delete the stack from AWS'
 	.option '-s, --skip-prompt',	'skip confirmation prompt'
+	.option '-m, --mute',			'mute sound effects'
 	.option '-d, --debug',			'show the full error stack trace'
 	.allowUnknownOption()
 	# .allowExcessArguments()
@@ -38,6 +40,7 @@ program
 	.command 'sync'
 	.description chalk.cyan 'sync to AWS S3'
 	.option '-s, --skip-prompt',	'skip confirmation prompt'
+	.option '-m, --mute',			'mute sound effects'
 	.option '-d, --debug',			'show the full error stack trace'
 	.allowUnknownOption()
 	# .allowExcessArguments()

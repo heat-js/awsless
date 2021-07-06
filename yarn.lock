@@ -260,10 +260,10 @@
     camel-case "4.1.2"
     tslib "~2.1.0"
 
-"@heat/npm-coffee-publisher@^0.1.8":
-  version "0.1.8"
-  resolved "https://registry.yarnpkg.com/@heat/npm-coffee-publisher/-/npm-coffee-publisher-0.1.8.tgz#02ee936ae7b95922b405e812bc0bc37b8d105864"
-  integrity sha512-n2lCrdAf2l5oYTYrDQ4dpke+70FHDtT7lJkKHrQtTn3PWr9oULK1KCJ4lKH5sueRpQj7PJvulh14GdjvTUY4og==
+"@heat/npm-coffee-publisher@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@heat/npm-coffee-publisher/-/npm-coffee-publisher-0.2.0.tgz#4ed58eea33f0a423e4a22ecc1e1070f49bc9c8fc"
+  integrity sha512-zFuhxhQpizcLCXNuDIBitBbw+yifSjGwaT2Jpder25nWQXIoi6JelxCQPT0n0FNp32WdiKCiv1PpkoO0XQr4fA==
   dependencies:
     "@babel/core" "^7.4.0"
     babel-plugin-transform-es2015-modules-commonjs "^6.26.2"
@@ -2301,6 +2301,11 @@ fill-range@^4.0.0:
     repeat-string "^1.6.1"
     to-regex-range "^2.1.0"
 
+find-exec@1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/find-exec/-/find-exec-1.0.1.tgz#c7cc26d6eed293f05542796d32d20094672902d1"
+  integrity sha512-4o6QkGkpg3xK5s/47rdK9LDZRsE4JR1mrXnaAOXBngG6UKeIDJXfwtNCAkljgyy6VRh75D3FFaB0tii9vDEtIA==
+
 find-replace@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/find-replace/-/find-replace-3.0.0.tgz#3e7e23d3b05167a76f770c9fbd5258b0def68c38"
@@ -3968,6 +3973,11 @@ once@^1.3.0, once@^1.3.1, once@^1.4.0:
   dependencies:
     wrappy "1"
 
+one-time@0.0.4:
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/one-time/-/one-time-0.0.4.tgz#f8cdf77884826fe4dff93e3a9cc37b1e4480742e"
+  integrity sha1-+M33eISCb+Tf+T46nMN7HkSAdC4=
+
 onetime@^5.1.0:
   version "5.1.2"
   resolved "https://registry.yarnpkg.com/onetime/-/onetime-5.1.2.tgz#d0e96ebb56b07476df1dd9c4806e5237985ca45e"
@@ -4182,6 +4192,13 @@ pkg-dir@^4.2.0:
   integrity sha512-HRDzbaKjC+AOWVXxAU/x54COGeIv9eb+6CkDSQoNTt4XyWoIJvuPsXizxu/Fr23EiekbtZwmh1IcIG/l/a10GQ==
   dependencies:
     find-up "^4.0.0"
+
+play-sound@^1.1.3:
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/play-sound/-/play-sound-1.1.3.tgz#420e9b0e8ebe6e009c84529a6ac9a094594a6cf8"
+  integrity sha512-lqEzgtNAdfg2VUXItOtu5bTyWcqeFmnJmgvc8iHEeEOBEJdurqiGYfmCOzIpSBcwrs7XeSpvHv+Rw9dzRPc4aw==
+  dependencies:
+    find-exec "1.0.1"
 
 pn@^1.1.0:
   version "1.1.0"
@@ -4728,6 +4745,13 @@ sax@>=0.6.0, sax@^1.2.4:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
   integrity sha512-NqVDv9TpANUjFm0N8uM5GxL36UgKi9/atZw+x7YFnQ8ckwFGKrl4xX4yWtrey3UJm5nP1kUbnYgLopqWNSRhWw==
+
+say@^0.16.0:
+  version "0.16.0"
+  resolved "https://registry.yarnpkg.com/say/-/say-0.16.0.tgz#c9e0cfe9e5b2c9af4098eab4023027e4c0e2e6e0"
+  integrity sha512-yEfncNu3I6lcZ6RIrXgE9DqbrEmvV5uQQ8ReM14u/DodlvJYpveqNphO55RLMSj77b06ZKNif/FLmhzQxcuUXg==
+  dependencies:
+    one-time "0.0.4"
 
 schema-utils@^3.0.0:
   version "3.0.0"

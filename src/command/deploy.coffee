@@ -13,9 +13,10 @@ import logStacks		from '../feature/terminal/log-stacks'
 import { run }			from '../feature/terminal/task'
 import log				from '../feature/terminal/log'
 import runTests			from '../feature/test/run'
+# import { playSuccess, playError }	from '../feature/sound'
+import say				from '../feature/sound/say'
 import path 			from 'path'
 import chalk			from 'chalk'
-import util				from 'util'
 import jsonFormat		from 'json-format'
 
 import { localResolvers, remoteResolvers, logicalResolvers, resources } from '../config'
@@ -200,7 +201,20 @@ export default (options) ->
 
 		await context.emitter.emit 'after-deploying-stack'
 
+		# -----------------------------------------------------
+		# play success sound
+
+		# await playSuccess()
+		say "The #{ stacks[ 0 ].stack } service has been deployed."
+
 	catch error
+
 		log.error error
+
+		# -----------------------------------------------------
+		# play error sound
+
+		# await playError()
+		say "An error occurred deploying the #{ stacks[ 0 ].stack } service."
 
 	process.exit 0

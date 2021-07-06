@@ -8,6 +8,8 @@ import removeDirectory 	from '../feature/fs/remove-directory'
 import logStacks		from '../feature/terminal/log-stacks'
 import log				from '../feature/terminal/log'
 import { run }			from '../feature/terminal/task'
+import say				from '../feature/sound/say'
+# import { playSuccess, playError }	from '../feature/sound'
 import chalk			from 'chalk'
 import path				from 'path'
 
@@ -114,7 +116,20 @@ export default (options) ->
 
 		await context.emitter.emit 'after-deleting-stack'
 
+		# -----------------------------------------------------
+		# play success sound
+
+		# await playSuccess()
+		say "The #{ stacks[ 0 ].stack } service has been deleted."
+
 	catch error
+
 		log.error error
+
+		# -----------------------------------------------------
+		# play error sound
+
+		# await playError()
+		say "An error occurred deleting the #{ stacks[ 0 ].stack } service."
 
 	process.exit 0

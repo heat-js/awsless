@@ -65,7 +65,7 @@ export default resource (ctx) ->
 		Properties: {
 			...destinationConfig ctx
 			FunctionName:				ctx.string [ 'Name', 'FunctionName' ]
-			MaximumEventAgeInSeconds:	ctx.string [ 'MaxEventAgeInSeconds', 'MaximumEventAgeInSeconds' ], 21600
+			MaximumEventAgeInSeconds:	ctx.number [ 'MaxEventAgeInSeconds', 'MaximumEventAgeInSeconds' ], 21600
 			MaximumRetryAttempts:		ctx.number [ 'MaxRetryAttempts', 'MaximumRetryAttempts' ], 2
 			Qualifier:					ctx.any 'Qualifier', '$LATEST'
 		}

@@ -18,9 +18,15 @@ expose({
 			]
 		});
 
+		// const { output } = await bundle.generate({
+		// 	format: 'umd',
+		// 	name: 	'handler'
+		// });
+
 		const { output } = await bundle.generate({
-			format: 'umd',
-			name: 	'handler'
+			format: 'iife',
+			name: 	'handler',
+			strict: false
 		});
 
 		return output[0].code

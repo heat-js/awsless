@@ -42,7 +42,21 @@ vpcConfig = (ctx) ->
 	if not Object.keys(vpc).length
 		return {}
 
-	addManagedPolicy ctx, 'AWSLambdaVPCAccessExecutionRole'
+	# addManagedPolicy ctx, 'AWSLambdaVPCAccessExecutionRole'
+
+	addPolicy ctx, 'lambda-vpc', [
+		{
+			Effect: 'Allow'
+			Action: [
+				'ec2:CreateNetworkInterface'
+				'ec2:DescribeNetworkInterfaces'
+				'ec2:DeleteNetworkInterface'
+				'ec2:AssignPrivateIpAddresses'
+				'ec2:UnassignPrivateIpAddresses'
+			]
+			Resource: '*'
+		}
+	]
 
 	return {
 		VpcConfig: {

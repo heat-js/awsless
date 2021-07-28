@@ -1,5 +1,14 @@
 
-export default (event) ->
-	console.log 'JHHJHHHHHHHHHH'
-	request = event.request
-	return request
+import handle from '@heat/lambda'
+
+export default handle(
+	(app) ->
+		response = event.response
+		console.log response
+		app.output = response
+)
+
+# export default (event) ->
+# 	response = event.response
+# 	console.log response
+# 	return response

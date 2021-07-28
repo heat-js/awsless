@@ -22,3 +22,4 @@ describe 'Resource CloudFront Function', ->
 			.toStrictEqual [
 				'TestFunction'
 			]
+	, 25000

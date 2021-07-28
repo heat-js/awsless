@@ -1,6 +1,6 @@
 {
 	"name": "@heat/awsless",
-	"version": "0.1.37",
+	"version": "0.1.38",
 	"license": "MIT",
 	"bin": {
 		"awsless": "./awsless.js"
@@ -80,7 +80,7 @@
 		"webpack": "^5.6.0"
 	},
 	"devDependencies": {
-		"@heat/lambda": "^0.8.52",
+		"@heat/cloud-front-function": "^0.0.2",
 		"@heat/npm-coffee-publisher": "^0.2.0",
 		"jest": "^24.8.0",
 		"jest-preset-coffeescript": "1.1.1"

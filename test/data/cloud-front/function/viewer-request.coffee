@@ -1,7 +1,9 @@
 
-import handle from '@heat/lambda'
+import handle 		from '@heat/cloud-front-function'
+import ForceNonWww 	from '@heat/cloud-front-function/middleware/force-non-www'
 
 export default handle(
+	new ForceNonWww
 	(app) ->
 		response = event.response
 		console.log response

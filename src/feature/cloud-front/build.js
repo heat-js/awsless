@@ -26,7 +26,6 @@ expose({
 			plugins: [
 				coffeescript(),
 				nodeResolve({
-					mainFields: ['main'],
 					preferBuiltins: false,
 					extensions: ['.js', '.coffee']
 				}),

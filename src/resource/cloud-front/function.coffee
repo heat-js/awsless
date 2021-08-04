@@ -2,6 +2,7 @@
 import resource 	from '../../feature/resource'
 import build 		from '../../feature/cloud-front/build-function'
 import { Sub }		from '../../feature/cloudformation/fn'
+
 export default resource (ctx) ->
 
 	prefixName	= ctx.string '@Config.PrefixResourceName', ''

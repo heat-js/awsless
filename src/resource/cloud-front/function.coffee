@@ -12,6 +12,7 @@ export default resource (ctx) ->
 	ctx.on 'prepare-resource', ->
 		code = await build handle
 		# console.log code
+		# console.log code.length, 'length'
 		ctx.addResource ctx.name, {
 			Type:	'AWS::CloudFront::Function'
 			Region:	ctx.string '#Region', ''

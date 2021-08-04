@@ -1101,10 +1101,12 @@
     camel-case "4.1.2"
     tslib "~2.1.0"
 
-"@heat/cloud-front-function@^0.0.3":
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/@heat/cloud-front-function/-/cloud-front-function-0.0.3.tgz#a6e0d37af4d7d14d43762f42b9dc2a8fc5629082"
-  integrity sha512-L4RDNScMPrcaqwAUTXeWtGvTpEWVmAL1pl3V00O8R9txf0UrTCXjmp0sbuRuRVQGDGAW6p7AUFqBUIsXBxdCfQ==
+"@heat/cloud-front-function@^0.0.12":
+  version "0.0.12"
+  resolved "https://registry.yarnpkg.com/@heat/cloud-front-function/-/cloud-front-function-0.0.12.tgz#34ffa8f42f4413932816b06f80b23e3f87421342"
+  integrity sha512-pxHoRIwPjJqkD4AoQ7KcP0Fbd01byzMOJTlknqRI6Mpo8v4MZaUTh70U1K8mWPHSFoVmnpp65A10aE2Ftqxkaw==
+  dependencies:
+    js-base64 "2.6.4"
 
 "@heat/npm-coffee-publisher@^0.2.0":
   version "0.2.0"
@@ -4236,6 +4238,11 @@ jmespath@0.15.0:
   version "0.15.0"
   resolved "https://registry.yarnpkg.com/jmespath/-/jmespath-0.15.0.tgz#a3f222a9aae9f966f5d27c796510e28091764217"
   integrity sha1-o/Iiqarp+Wb10nx5ZRDigJF2Qhc=
+
+js-base64@2.6.4:
+  version "2.6.4"
+  resolved "https://registry.yarnpkg.com/js-base64/-/js-base64-2.6.4.tgz#f4e686c5de1ea1f867dbcad3d46d969428df98c4"
+  integrity sha512-pZe//GGmwJndub7ZghVHz7vjb2LgC1m8B07Au3eYqeqv9emhESByMXxaEgkUkEqJe87oBbSniGYoQNIBklc7IQ==
 
 "js-tokens@^3.0.0 || ^4.0.0", js-tokens@^4.0.0:
   version "4.0.0"

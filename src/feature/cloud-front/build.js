@@ -30,18 +30,30 @@ expose({
 					extensions: ['.js', '.coffee']
 				}),
 				commonjs(),
-				terser(),
+				terser({
+					compress: {
+						negate_iife: false,
+						defaults: false,
+						ecma: 5,
+					},
+					ecma: 5,
+					mangle: true,
+					toplevel: false,
+				}),
 				babel({
-					babelrc: false,
-					extensions: [".js"],
-					runtimeHelpers: true,
-					exclude: ["node_modules/@babel/**"],
-					presets: [
-						[ "@babel/preset-env", {
-							modules: false,
-							targets: "defaults",
-						} ],
-					  ],
+					presets: [ "@babel/preset-env" ],
+					// extensions: [ ".js" ],
+					// runtimeHelpers: true,
+					// presets: [
+						// [ "@babel/preset-env", {
+						// 	// modules: false,
+						// 	// forceAllTransforms: true,
+						// 	// useBuiltIns: false,
+						// 	targets: {
+						// 		browsers: [ "ie < 8" ],
+						// 	}
+						// } ],
+					// ],
 					// plugins: [
 					// 	"@babel/plugin-syntax-dynamic-import",
 					// 	[

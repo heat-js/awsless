@@ -23,6 +23,18 @@ formatHostedZoneName = (domain) ->
 
 	return "#{ result.domain }.#{ result.topLevelDomains.join '.' }."
 
+functionAssociations = (ctx) ->
+	events = ctx.array 'Events', []
+	if not events.length
+		return {}
+
+	return {
+		FunctionAssociations: events.map (event, index) -> {
+			EventType:		ctx.string "Events.#{ index }.Type"
+			FunctionARN:	ctx.string [ "Events.#{ index }.Arn", "Events.#{ index }.ARN" ]
+		}
+	}
+
 lambdaFunctionAssociations = (ctx) ->
 	events = ctx.array 'LambdaEvents', []
 	if not events.length
@@ -129,6 +141,7 @@ export default resource (ctx) ->
 							Forward: 'none'
 						}
 					}
+					...functionAssociations ctx
 					...lambdaFunctionAssociations ctx
 				}
 			}

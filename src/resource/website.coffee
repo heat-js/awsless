@@ -23,6 +23,36 @@ formatHostedZoneName = (domain) ->
 
 	return "#{ result.domain }.#{ result.topLevelDomains.join '.' }."
 
+forwardedValues = (ctx) ->
+	forwarded = {}
+
+	headers = ctx.array 'Forwarded.Headers', []
+	cookies = ctx.array 'Forwarded.Cookies', []
+	queries = ctx.array 'Forwarded.QueryStrings', []
+
+	if headers.length
+		forwarded.Headers = headers
+
+	if cookies.length
+		forwarded.Cookies = {
+			Forward: 'whitelist'
+			WhitelistedNames: cookies
+		}
+	else
+		forwarded.Cookies = {
+			Forward: 'none'
+		}
+
+	if queries.length
+		forwarded.QueryString = true
+		forwarded.QueryStringCacheKeys = queries
+	else
+		forwarded.QueryString = false
+
+	return {
+		ForwardedValues: forwarded
+	}
+
 functionAssociations = (ctx) ->
 	events = ctx.array 'Events', []
 	if not events.length
@@ -135,12 +165,8 @@ export default resource (ctx) ->
 					ViewerProtocolPolicy: 'redirect-to-https'
 					AllowedMethods: [ 'GET', 'HEAD', 'OPTIONS' ]
 					Compress: true
-					ForwardedValues: {
-						QueryString: false
-						Cookies: {
-							Forward: 'none'
-						}
-					}
+
+					...forwardedValues ctx
 					...functionAssociations ctx
 					...lambdaFunctionAssociations ctx
 				}

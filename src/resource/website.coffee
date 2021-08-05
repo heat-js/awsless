@@ -26,9 +26,9 @@ formatHostedZoneName = (domain) ->
 forwardedValues = (ctx) ->
 	forwarded = {}
 
-	headers = ctx.array 'Forwarded.Headers', []
-	cookies = ctx.array 'Forwarded.Cookies', []
-	queries = ctx.array 'Forwarded.QueryStrings', []
+	headers = ctx.array 'Forward.Headers', []
+	cookies = ctx.array 'Forward.Cookies', []
+	queries = ctx.array 'Forward.QueryStrings', []
 
 	if headers.length
 		forwarded.Headers = headers

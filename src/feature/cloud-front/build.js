@@ -1,18 +1,16 @@
 
-const { rollup } 	= require('rollup');
-const { babel, getBabelOutputPlugin } 	= require('@rollup/plugin-babel');
-const { terser } 	= require('rollup-plugin-terser');
-const coffeescript 	= require('rollup-plugin-coffee-script');
-const commonjs 		= require('rollup-plugin-commonjs');
-const nodeResolve 	= require('rollup-plugin-node-resolve');
-const { expose } 	= require('threads/worker');
-const builtins 		= require('builtin-modules');
+const { rollup } 		= require('rollup');
+const { getBabelOutputPlugin } 	= require('@rollup/plugin-babel');
+const { terser } 		= require('rollup-plugin-terser');
+const coffeescript 		= require('rollup-plugin-coffee-script');
+const commonjs 			= require('@rollup/plugin-commonjs');
+const { nodeResolve } 	= require('@rollup/plugin-node-resolve');
+const { expose } 		= require('threads/worker');
 
 expose({
 	build: async function(inputFile) {
 		const bundle = await rollup({
 			input: inputFile,
-			external: builtins,
 			onwarn: function (message) {
 				supressedWarnings = [
 					'MISSING_GLOBAL_NAME',
@@ -26,13 +24,13 @@ expose({
 			plugins: [
 				coffeescript(),
 				nodeResolve({
-					preferBuiltins: false,
-					extensions: ['.js', '.coffee']
+					preferBuiltins: true,
+					extensions: [ '.js', '.coffee' ],
 				}),
 				commonjs(),
 				getBabelOutputPlugin({
 					allowAllFormats: true,
-					presets: [ "@babel/preset-env" ]
+					presets: [ "@babel/preset-env" ],
 				}),
 				terser({
 					compress: {
@@ -50,9 +48,10 @@ expose({
 			format: 		'iife',
 			name: 			'handler',
 			strict: 		false,
-			// indent: 		false,
-    		// sourcemap: 		false,
-			// esModule:		false,
+			globals: {
+				querystring: 	'require("querystring")',
+				crypto: 		'require("crypto")',
+			}
 		});
 
 		code = output[0].code

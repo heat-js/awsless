@@ -13,6 +13,7 @@ export default class Context
 		@outputs	= {}
 		@resources	= {}
 		@globals	= {}
+		@stacks		= []
 		@emitter
 	}) ->
 		@refs = {}
@@ -34,6 +35,9 @@ export default class Context
 	getOutputs: ->
 		return @outputs
 
+	getDefinedStacks: ->
+		return @stacks
+
 	setAttribute: (name, attr, value) ->
 		@globals[ "attr-#{ name }-#{ attr }" ] = value
 
@@ -49,6 +53,16 @@ export default class Context
 
 	addOutput: (name, output) ->
 		@outputs[name] = output
+
+	addStack: ({ name, region, profile, description, resources, outputs }) ->
+		@stacks.push {
+			name
+			region
+			profile
+			description
+			resources
+			outputs
+		}
 
 	ref: (key) ->
 		return @refs[ key ] or ( @refs[ key ] = new Reference )
@@ -68,6 +82,7 @@ export default class Context
 			@outputs
 			@emitter
 			@globals
+			@stacks
 			name
 			resource
 		}

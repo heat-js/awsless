@@ -18,6 +18,7 @@ import lambdaPolicy				from './resource/lambda/policy'
 import lambdaLayer				from './resource/lambda/layer'
 import lambdaEventInvokeConfig	from './resource/lambda/event-invoke-config'
 import cloudFrontFunction		from './resource/cloud-front/function'
+import cloudFormationStack		from './resource/cloud-formation/stack'
 
 export localResolvers = {
 	env
@@ -47,4 +48,5 @@ export resources = {
 	'Awsless::Lambda::Layer':				lambdaLayer
 	'Awsless::Lambda::AsyncConfig':			lambdaEventInvokeConfig
 	'Awsless::CloudFront::Function':		cloudFrontFunction
+	'Awsless::CloudFormation::Stack':		cloudFormationStack
 }

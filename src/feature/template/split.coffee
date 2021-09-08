@@ -41,7 +41,7 @@ export default (context) ->
 
 	# console.log regions
 
-	return regions.map (region) ->
+	stacks = regions.map (region) ->
 		return {
 			name: stack
 			stack
@@ -55,3 +55,20 @@ export default (context) ->
 				Outputs:		filter outputs, defaultRegion, region
 			}
 		}
+
+	for entry in context.getDefinedStacks()
+		stacks.push {
+			name:		entry.name		or stack
+			stack:		entry.name		or stack
+			bucket
+			region:		entry.region	or defaultRegion
+			profile:	entry.profile	or profile
+			templateBody: {
+				AWSTemplateFormatVersion: '2010-09-09'
+				Description:	entry.description or ''
+				Resources:		entry.resources
+				Outputs:		entry.outputs or []
+			}
+		}
+
+	return stacks

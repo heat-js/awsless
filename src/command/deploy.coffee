@@ -101,7 +101,6 @@ export default (options) ->
 				context.emitter.emit 'cleanup'
 			]
 
-
 		# -----------------------------------------------------
 		# Run events before stack update
 
@@ -163,7 +162,6 @@ export default (options) ->
 
 			return Promise.all stacks.map (stack) ->
 				return stack.capabilities = await validateTemplate stack
-
 
 		# -----------------------------------------------------
 		# Log the stack capabilities

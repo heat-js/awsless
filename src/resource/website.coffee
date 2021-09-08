@@ -23,6 +23,48 @@ formatHostedZoneName = (domain) ->
 
 	return "#{ result.domain }.#{ result.topLevelDomains.join '.' }."
 
+forwardedValues = (ctx) ->
+	forwarded = {}
+
+	headers = ctx.array 'Forward.Headers', []
+	cookies = ctx.array 'Forward.Cookies', []
+	queries = ctx.array 'Forward.QueryStrings', []
+
+	if headers.length
+		forwarded.Headers = headers
+
+	if cookies.length
+		forwarded.Cookies = {
+			Forward: 'whitelist'
+			WhitelistedNames: cookies
+		}
+	else
+		forwarded.Cookies = {
+			Forward: 'none'
+		}
+
+	if queries.length
+		forwarded.QueryString = true
+		forwarded.QueryStringCacheKeys = queries
+	else
+		forwarded.QueryString = false
+
+	return {
+		ForwardedValues: forwarded
+	}
+
+functionAssociations = (ctx) ->
+	events = ctx.array 'Events', []
+	if not events.length
+		return {}
+
+	return {
+		FunctionAssociations: events.map (event, index) -> {
+			EventType:		ctx.string "Events.#{ index }.Type"
+			FunctionARN:	ctx.string [ "Events.#{ index }.Arn", "Events.#{ index }.ARN" ]
+		}
+	}
+
 lambdaFunctionAssociations = (ctx) ->
 	events = ctx.array 'LambdaEvents', []
 	if not events.length
@@ -123,12 +165,9 @@ export default resource (ctx) ->
 					ViewerProtocolPolicy: 'redirect-to-https'
 					AllowedMethods: [ 'GET', 'HEAD', 'OPTIONS' ]
 					Compress: true
-					ForwardedValues: {
-						QueryString: false
-						Cookies: {
-							Forward: 'none'
-						}
-					}
+
+					...forwardedValues ctx
+					...functionAssociations ctx
 					...lambdaFunctionAssociations ctx
 				}
 			}

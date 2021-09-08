@@ -1,6 +1,10 @@
 {
 	"name": "@heat/awsless",
+<<<<<<< HEAD
 	"version": "0.1.22",
+=======
+	"version": "0.1.47",
+>>>>>>> 475a77c9cee21a958a3f7e547e73645447810b87
 	"license": "MIT",
 	"bin": {
 		"awsless": "./awsless.js"
@@ -29,12 +33,18 @@
 		]
 	},
 	"dependencies": {
+		"@babel/plugin-transform-runtime": "^7.14.5",
+		"@babel/preset-env": "^7.14.8",
 		"@bugsnag/source-maps": "^2.0.0",
 		"@graphql-tools/merge": "^6.2.7",
 		"@heat/s3-deploy": "^0.0.13",
+		"@rollup/plugin-babel": "^5.3.0",
+		"@rollup/plugin-commonjs": "^20.0.0",
+		"@rollup/plugin-node-resolve": "^13.0.4",
 		"aws-param-store": "^3.2.0",
 		"aws-sdk": "^2.795.0",
 		"boxen": "^4.2.0",
+		"builtin-modules": "^3.2.0",
 		"capitalize": "^2.0.3",
 		"cli-spinners": "^2.6.0",
 		"coffee-loader": "^1.0.1",
@@ -65,7 +75,8 @@
 		"rimraf": "^3.0.2",
 		"rollup": "^2.47.0",
 		"rollup-plugin-coffee-script": "^2.0.0",
-		"rollup-plugin-node-resolve": "^5.2.0",
+		"rollup-plugin-node-builtins": "^2.1.2",
+		"rollup-plugin-node-globals": "^1.4.0",
 		"rollup-plugin-terser": "^7.0.2",
 		"say": "^0.16.0",
 		"stream-to-buffer": "^0.1.0",
@@ -76,6 +87,7 @@
 		"webpack": "^5.6.0"
 	},
 	"devDependencies": {
+		"@heat/cloud-front-function": "^0.0.15",
 		"@heat/npm-coffee-publisher": "^0.2.0",
 		"jest": "^24.8.0",
 		"jest-preset-coffeescript": "1.1.1"

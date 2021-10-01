@@ -20,7 +20,7 @@ export default resource (ctx) ->
 			Enabled:		true
 			BatchSize:		ctx.number 'BatchSize', 10
 			EventSourceArn: queue
-			# MaximumBatchingWindowInSeconds:	ctx.number [ 'MaximumBatchingWindowInSeconds' ], 10
+			MaximumBatchingWindowInSeconds:	ctx.number [ 'MaximumBatchingWindowInSeconds' ], 10
 		}
 	}
 

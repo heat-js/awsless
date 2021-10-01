@@ -269,3 +269,35 @@ export default resource (ctx) ->
 		for item in resolvers
 			resolver ctx, item
 			dataSource ctx, item, cache
+
+
+
+# batchResolvers = chunk resolvers
+# 		for resolvers, index in batchResolvers
+# 			cloudFormationStack(
+# 				ctx
+# 				"#{ ctx.name }Stack"
+# 				{
+# 					Description: "#{ ctx.name } resolvers stack #{ index }"
+# 					Resources: {
+# 						...resolver ctx, item
+# 						...dataSource ctx, item
+# 					}
+# 				}
+# 				{
+# 					Region:	region
+# 					DependsOn: [
+# 						- "#{ ctx.name }Schema"
+# 						- "#{ ctx.name }ServiceRole"
+# 					]
+# 				}
+# 			)
+
+# 			ctx.addResource "#{ ctx.name }Stack", {
+# 				Type:	'AWS::AppSync::GraphQLSchema'
+# 				Region:	region
+# 				Properties: {
+# 					ApiId:			GetAtt ctx.name, 'ApiId'
+# 					Definition:		schema
+# 				}
+# 			}

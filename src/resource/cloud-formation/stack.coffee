@@ -22,11 +22,25 @@ upload = ({ name, profile, region, stack, bucket, templateBody }) ->
 	return "https://s3-#{ region }.amazonaws.com/#{ bucket }/#{ stack }/#{ name }-nested-cloudformation.json"
 
 timeoutInMinutes = (ctx) ->
-	TimeoutInMinutes = ctx.number 'TimeoutInMinutes', -1
-	if TimeoutInMinutes is -1
+	TimeoutInMinutes = ctx.number 'TimeoutInMinutes', ''
+	if TimeoutInMinutes is ''
 		return {}
 
 	return { TimeoutInMinutes }
+
+parameters = (ctx) ->
+	Parameters = ctx.object 'Parameters', {}
+	if Object.keys(Parameters).length is 0
+		return {}
+
+	return { Parameters }
+
+dependsOn = (ctx) ->
+	DependsOn = ctx.array '#DependsOn', []
+	if DependsOn.length is 0
+		return {}
+
+	return { DependsOn }
 
 export default resource (ctx) ->
 
@@ -36,15 +50,13 @@ export default resource (ctx) ->
 	bucket		= ctx.string [ 'DeploymentBucket',	'@Config.CloudFormation.DeploymentBucket', '@Config.DeploymentBucket' ]
 
 	ctx.on 'prepare-resource', ->
-		resources = ctx.string 'Resources'
-
 		url = await upload {
 			name:	ctx.name
 			stack
 			region
 			profile
 			bucket
-			templateBody: {
+			templateBody: JSON.stringify {
 				AWSTemplateFormatVersion: '2010-09-09'
 				Description:	ctx.string 'Description', ''
 				Resources:		ctx.object 'Resources'
@@ -55,11 +67,12 @@ export default resource (ctx) ->
 		ctx.addResource ctx.name, {
 			Type:		'AWS::CloudFormation::Stack'
 			Region:		ctx.string '#Region', ''
-			DependsOn:	ctx.any '#DependsOn', ''
+			...dependsOn ctx
 			Properties: {
-				TemplateURL:		url
-				Parameters:			ctx.object 'Parameters', {}
-				Tags:				ctx.array 'Tags', []
+				TemplateURL: 	url
+				Tags:			ctx.array 'Tags', []
+
 				...timeoutInMinutes ctx
+				...parameters ctx
 			}
 		}

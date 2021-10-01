@@ -28,8 +28,6 @@ export default ({ template, resource, properties, paths, type, defaultValue }) -
 			if type is 'string' and valueType is 'object' and ( isFn(value) or isAttr(value) )
 				return value
 
-			console.log value, value instanceof Attribute
-
 			throw new TypeError "Property \"#{ path }\" isnt a \"#{ type }\"."
 
 		return value

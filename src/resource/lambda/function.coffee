@@ -228,6 +228,7 @@ export default resource (ctx) ->
 				Role:			role or GetAtt 'LambdaPolicyIamRole', 'Arn'
 				MemorySize:		ctx.number [ 'MemorySize', '@Config.Lambda.MemorySize' ], 128
 				Runtime:		ctx.string [ 'Runtime', '@Config.Lambda.Runtime' ], 'nodejs12.x'
+				Architectures:	ctx.array  [ 'Architecture', '@Config.Lambda.Architecture' ], [ 'x86_64' ]
 				Timeout:		ctx.number [ 'Timeout', '@Config.Lambda.Timeout' ], 30
 				Layers:			layers
 

@@ -110,7 +110,6 @@ export default resource (ctx) ->
 	role			= ctx.string [ 'Role', '@Config.Lambda.Role' ], ''
 	layers			= ctx.array [ 'Layers', '@Config.Lambda.Layers' ], []
 	logging			= ctx.boolean [ 'Logging', '@Config.Lambda.Logging' ], false
-	exportAsLayer	= ctx.boolean [ 'ExportAsLayer' ], false
 	warmer			= ctx.boolean [ 'Warmer', '@Config.Lambda.Warmer' ], false
 	events			= ctx.array 'Events', []
 	externals		= ctx.array [ 'Externals', '@Config.Lambda.Externals' ], []
@@ -244,26 +243,26 @@ export default resource (ctx) ->
 			}
 		}
 
-		if exportAsLayer
-			ctx.addResource "#{ ctx.name }LayerVersion#{ checksum }", {
-				Type: 'AWS::Lambda::LayerVersion'
-				Region: region
-				DeletionPolicy: 'Retain'
-				Properties: {
-					LayerName:				 name
-					CompatibleRuntimes:		 [ ctx.string [ 'Runtime', '@Config.Lambda.Runtime' ], 'nodejs12.x' ]
-					CompatibleArchitectures: [ ctx.string [ 'Architecture', '@Config.Lambda.Architecture' ], 'arm64' ]
-					# CompatibleRuntimes:	runtimes
-					# Architectures:	[ ctx.string [ 'Architecture', '@Config.Lambda.Architecture' ], 'arm64' ]
-					Content: {
-						S3Bucket:			bucket
-						S3Key:				key
-						S3ObjectVersion:	version
-					}
-				}
-			}
-
-			ctx.setAttribute ctx.name, 'VersionedLayerArn',	Ref "#{ ctx.name }LayerVersion#{ checksum }"
+		# exportAsLayer	= ctx.boolean [ 'ExportAsLayer' ], false
+		# if exportAsLayer
+		# 	ctx.addResource "#{ ctx.name }LayerVersion#{ checksum }", {
+		# 		Type: 'AWS::Lambda::LayerVersion'
+		# 		Region: region
+		# 		DeletionPolicy: 'Retain'
+		# 		Properties: {
+		# 			LayerName:				 name
+		# 			CompatibleRuntimes:		 [ ctx.string [ 'Runtime', '@Config.Lambda.Runtime' ], 'nodejs12.x' ]
+		# 			CompatibleArchitectures: [ ctx.string [ 'Architecture', '@Config.Lambda.Architecture' ], 'arm64' ]
+		# 			# CompatibleRuntimes:	runtimes
+		# 			# Architectures:	[ ctx.string [ 'Architecture', '@Config.Lambda.Architecture' ], 'arm64' ]
+		# 			Content: {
+		# 				S3Bucket:			bucket
+		# 				S3Key:				key
+		# 				S3ObjectVersion:	version
+		# 			}
+		# 		}
+		# 	}
+		# 	ctx.setAttribute ctx.name, 'VersionedLayerArn',	Ref "#{ ctx.name }LayerVersion#{ checksum }"
 
 		if Object.keys(asyncConfig).length
 			eventInvokeConfig(

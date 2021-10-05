@@ -244,17 +244,6 @@ export default resource (ctx) ->
 			}
 		}
 
-		if Object.keys(asyncConfig).length
-			eventInvokeConfig(
-				ctx
-				"#{ ctx.name }AsyncConfig"
-				{
-					...asyncConfig
-					Name: Ref ctx.name
-				}
-				{ Region: region }
-			)
-
 		if exportAsLayer
 			ctx.addResource ctx.name, {
 				Type: 'AWS::Lambda::LayerVersion'
@@ -270,3 +259,14 @@ export default resource (ctx) ->
 					}
 				}
 			}
+
+		if Object.keys(asyncConfig).length
+			eventInvokeConfig(
+				ctx
+				"#{ ctx.name }AsyncConfig"
+				{
+					...asyncConfig
+					Name: Ref ctx.name
+				}
+				{ Region: region }
+			)

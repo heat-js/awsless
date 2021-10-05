@@ -248,6 +248,7 @@ export default resource (ctx) ->
 			console.log {
 				Type: 'AWS::Lambda::LayerVersion'
 				Region: region
+				DeletionPolicy: 'Retain'
 				Properties: {
 					LayerName:			name
 					CompatibleRuntimes:	[ ctx.string [ 'Runtime', '@Config.Lambda.Runtime' ], 'nodejs12.x' ]
@@ -262,9 +263,10 @@ export default resource (ctx) ->
 				}
 			}
 
-			ctx.addResource ctx.name, {
+			ctx.addResource "#{ ctx.name }LayerVersion#{ checksum }", {
 				Type: 'AWS::Lambda::LayerVersion'
 				Region: region
+				DeletionPolicy: 'Retain'
 				Properties: {
 					LayerName:			name
 					CompatibleRuntimes:	[ ctx.string [ 'Runtime', '@Config.Lambda.Runtime' ], 'nodejs12.x' ]

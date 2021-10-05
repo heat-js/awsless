@@ -1,7 +1,6 @@
 
 import resource				from '../../feature/resource'
 import uploadLambda			from '../../feature/lambda/upload'
-import uploadLayer			from '../../feature/lambda/layer-upload'
 import { Ref, GetAtt, Sub }	from '../../feature/cloudformation/fn'
 import removeDirectory		from '../../feature/fs/remove-directory'
 import objectPath 			from '../../feature/object-path'
@@ -257,15 +256,6 @@ export default resource (ctx) ->
 			)
 
 		if exportAsLayer
-			{ key, version } = await uploadLayer {
-				stack
-				profile
-				region
-				bucket
-				name
-				zip
-			}
-
 			ctx.addResource ctx.name, {
 				Type: 'AWS::Lambda::LayerVersion'
 				Region: region

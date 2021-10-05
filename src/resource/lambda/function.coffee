@@ -245,11 +245,30 @@ export default resource (ctx) ->
 		}
 
 		if exportAsLayer
+			console.log {
+				Type: 'AWS::Lambda::LayerVersion'
+				Region: region
+				Properties: {
+					LayerName:			name
+					CompatibleRuntimes:	[ ctx.string [ 'Runtime', '@Config.Lambda.Runtime' ], 'nodejs12.x' ]
+					Architectures:		[ ctx.string [ 'Architecture', '@Config.Lambda.Architecture' ], 'arm64' ]
+					# CompatibleRuntimes:	runtimes
+					# Architectures:	[ ctx.string [ 'Architecture', '@Config.Lambda.Architecture' ], 'arm64' ]
+					Content: {
+						S3Bucket:			bucket
+						S3Key:				key
+						S3ObjectVersion:	version
+					}
+				}
+			}
+
 			ctx.addResource ctx.name, {
 				Type: 'AWS::Lambda::LayerVersion'
 				Region: region
 				Properties: {
 					LayerName:			name
+					CompatibleRuntimes:	[ ctx.string [ 'Runtime', '@Config.Lambda.Runtime' ], 'nodejs12.x' ]
+					Architectures:		[ ctx.string [ 'Architecture', '@Config.Lambda.Architecture' ], 'arm64' ]
 					# CompatibleRuntimes:	runtimes
 					# Architectures:	[ ctx.string [ 'Architecture', '@Config.Lambda.Architecture' ], 'arm64' ]
 					Content: {

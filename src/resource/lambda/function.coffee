@@ -243,27 +243,6 @@ export default resource (ctx) ->
 			}
 		}
 
-		# exportAsLayer	= ctx.boolean [ 'ExportAsLayer' ], false
-		# if exportAsLayer
-		# 	ctx.addResource "#{ ctx.name }LayerVersion#{ checksum }", {
-		# 		Type: 'AWS::Lambda::LayerVersion'
-		# 		Region: region
-		# 		DeletionPolicy: 'Retain'
-		# 		Properties: {
-		# 			LayerName:				 name
-		# 			CompatibleRuntimes:		 [ ctx.string [ 'Runtime', '@Config.Lambda.Runtime' ], 'nodejs12.x' ]
-		# 			CompatibleArchitectures: [ ctx.string [ 'Architecture', '@Config.Lambda.Architecture' ], 'arm64' ]
-		# 			# CompatibleRuntimes:	runtimes
-		# 			# Architectures:	[ ctx.string [ 'Architecture', '@Config.Lambda.Architecture' ], 'arm64' ]
-		# 			Content: {
-		# 				S3Bucket:			bucket
-		# 				S3Key:				key
-		# 				S3ObjectVersion:	version
-		# 			}
-		# 		}
-		# 	}
-		# 	ctx.setAttribute ctx.name, 'VersionedLayerArn',	Ref "#{ ctx.name }LayerVersion#{ checksum }"
-
 		if Object.keys(asyncConfig).length
 			eventInvokeConfig(
 				ctx

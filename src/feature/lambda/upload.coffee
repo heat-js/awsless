@@ -4,6 +4,7 @@ import Client				from '../client/s3'
 import path					from 'path'
 # import build				from './build'
 import createHash 			from '../crypto/hash-file'
+import createChecksum 		from '../crypto/checksum'
 import zip 					from '../fs/zip-files'
 import { createReadStream }	from 'fs'
 # import { task, warn }		from '../console'
@@ -13,7 +14,7 @@ import throttle				from '../performance/throttle'
 import uploadSourceMap		from '../bugsnag/upload-source-map'
 import filesize 			from 'filesize'
 import chalk				from 'chalk'
-import createChecksum		from 'hash-then'
+import createFileChecksum	from 'hash-then'
 # import Worker				from 'jest-worker'
 import { spawn, Thread, Worker } from "threads"
 
@@ -70,7 +71,7 @@ getObject = ({ region, profile, bucket, key }) ->
 		version:	result.VersionId
 	}
 
-export default ({ profile, region, bucket, name, stack, handle, externals = [], files = {}, bugsnagApiKey }) ->
+export default ({ profile, region, bucket, name, stack, handle, externals = [], files = {}, policyChecksum = '', bugsnagApiKey }) ->
 
 	root = process.cwd()
 
@@ -103,8 +104,9 @@ export default ({ profile, region, bucket, name, stack, handle, externals = [], 
 			}
 
 			object		= await getObject { profile, region, bucket, key }
-			checksum	= await createChecksum uncompPath
-			checksum 	= checksum.substr 0, 16
+			checksum	= await createFileChecksum uncompPath
+			checksum 	= createChecksum [ checksum, policyChecksum ]
+			# checksum 	= checksum.substr 0, 16
 
 			if object and object.metadata.checksum is checksum
 				task.warning()

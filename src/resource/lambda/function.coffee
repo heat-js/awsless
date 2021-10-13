@@ -206,9 +206,10 @@ export default resource (ctx) ->
 			externals
 			files
 			bugsnagApiKey
+			policyChecksum: policyChecksum ctx
 		}
 
-		checksum = createChecksum checksum, policyChecksum ctx
+		# checksum = createChecksum checksum, policyChecksum ctx
 
 		ctx.addResource "#{ ctx.name }Version#{ checksum }", {
 			Type: 'AWS::Lambda::Version'

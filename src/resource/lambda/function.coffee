@@ -172,6 +172,16 @@ export default resource (ctx) ->
 			when 'iot'		then iot ctx, ctx.name, event
 			else throw TypeError "Unknown lambda event type: \"#{type}\""
 
+	if Object.keys(asyncConfig).length
+		eventInvokeConfig(
+			ctx
+			"#{ ctx.name }AsyncConfig"
+			{
+				...asyncConfig
+				Name: Ref ctx.name
+			}
+			{ Region: region }
+		)
 
 	ctx.once 'cleanup', ->
 		dir = path.join process.cwd(), '.awsless', 'lambda'
@@ -198,7 +208,7 @@ export default resource (ctx) ->
 			bugsnagApiKey
 		}
 
-		# checksum = createChecksum checksum, policyChecksum ctx
+		checksum = createChecksum checksum, policyChecksum ctx
 
 		ctx.addResource "#{ ctx.name }Version#{ checksum }", {
 			Type: 'AWS::Lambda::Version'
@@ -242,14 +252,3 @@ export default resource (ctx) ->
 				]
 			}
 		}
-
-		if Object.keys(asyncConfig).length
-			eventInvokeConfig(
-				ctx
-				"#{ ctx.name }AsyncConfig"
-				{
-					...asyncConfig
-					Name: Ref ctx.name
-				}
-				{ Region: region }
-			)

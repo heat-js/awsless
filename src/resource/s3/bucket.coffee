@@ -2,6 +2,7 @@
 import sync				from '@heat/s3-deploy/sync'
 import path				from 'path'
 import filesize 		from 'filesize'
+import { paramCase }	from 'change-case'
 import resource 		from '../../feature/resource'
 import isDirectory		from '../../feature/fs/is-directory'
 import emptyBucket		from '../../feature/s3/empty-bucket'
@@ -20,7 +21,7 @@ export default resource (ctx) ->
 	# -------------------------------------------------------
 	# Make the s3 bucket
 
-	ctx.addResource "#{ ctx.name }S3Bucket", {
+	ctx.addResource ctx.name, {
 		Type: 'AWS::S3::Bucket'
 		Properties: {
 			BucketName
@@ -64,7 +65,7 @@ export default resource (ctx) ->
 				folder
 				bucket:					BucketName
 				ignoredExtensions:		ctx.array 'Syncing.IgnoreExtensions', []
-				acl:					AccessControl
+				acl:					paramCase ctx.string [ 'Syncing.AccessControl', 'AccessControl' ], 'Private'
 				cacheAge:				ctx.number 'CacheAge', 31536000
 				logging: 				false
 			}

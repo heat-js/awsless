@@ -1,6 +1,6 @@
 {
 	"name": "@heat/awsless",
-	"version": "0.1.73",
+	"version": "0.1.74",
 	"license": "MIT",
 	"bin": {
 		"awsless": "./awsless.js"
@@ -42,6 +42,7 @@
 		"boxen": "^4.2.0",
 		"builtin-modules": "^3.2.0",
 		"capitalize": "^2.0.3",
+		"change-case": "^4.1.2",
 		"cli-spinners": "^2.6.0",
 		"coffee-loader": "^1.0.1",
 		"commander": "^6.2.1",

@@ -12,6 +12,7 @@ import website					from './resource/website'
 import appsyncApi				from './resource/appsync/api'
 import snsTopic					from './resource/sns/topic'
 import sqsQueue					from './resource/sqs/queue'
+import s3Bucket					from './resource/s3/bucket'
 import dynamoDBTable			from './resource/dynamodb/table'
 import lambdaFunction			from './resource/lambda/function'
 import lambdaPolicy				from './resource/lambda/policy'
@@ -42,6 +43,7 @@ export resources = {
 	'Awsless::Appsync::Api':				appsyncApi
 	'Awsless::SNS::Topic':					snsTopic
 	'Awsless::SQS::Queue':					sqsQueue
+	'Awsless::S3::Bucket':					s3Bucket
 	'Awsless::DynamoDB::Table':				dynamoDBTable
 	'Awsless::Lambda::Function':			lambdaFunction
 	'Awsless::Lambda::Policy':				lambdaPolicy

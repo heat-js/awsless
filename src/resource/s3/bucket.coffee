@@ -26,6 +26,12 @@ export default resource (ctx) ->
 		Properties: {
 			BucketName
 			AccessControl
+			PublicAccessBlockConfiguration: {
+				BlockPublicAcls:		ctx.boolean 'Block.Acls',		true
+				BlockPublicPolicy:		ctx.boolean 'Block.Policy',		true
+				IgnorePublicAcls:		ctx.boolean 'Block.Ignore',		true
+				RestrictPublicBuckets:	ctx.boolean 'Block.Restrict',	true
+			}
 		}
 	}
 

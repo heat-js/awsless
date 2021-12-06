@@ -71,7 +71,7 @@ getObject = ({ region, profile, bucket, key }) ->
 		version:	result.VersionId
 	}
 
-export default ({ profile, region, bucket, name, stack, handle, externals = [], files = {}, policyChecksum = '', bugsnagApiKey }) ->
+export default ({ profile, region, bucket, name, stack, handle, externals = [], files = {}, policyChecksum = '', bugsnagApiKey, webpackConfig = {} }) ->
 
 	root = process.cwd()
 
@@ -99,8 +99,9 @@ export default ({ profile, region, bucket, name, stack, handle, externals = [], 
 			task.setContent 'Checking...'
 
 			await build file, uncompFile, {
-				minimize: false
 				externals
+				minimize: false
+				webpackConfig
 			}
 
 			object		= await getObject { profile, region, bucket, key }
@@ -118,8 +119,9 @@ export default ({ profile, region, bucket, name, stack, handle, externals = [], 
 			task.setContent 'Building...'
 
 			await build file, compFile, {
-				minimize: true
 				externals
+				minimize: true
+				webpackConfig
 			}
 
 			size = await zip compPath, zipFile

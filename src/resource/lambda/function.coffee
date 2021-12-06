@@ -116,6 +116,7 @@ export default resource (ctx) ->
 	files			= ctx.object [ 'Files',	'@Config.Lambda.Files' ], {}
 	asyncConfig		= ctx.object [ 'Async', '@Config.Lambda.Async' ], {}
 	bugsnagApiKey	= ctx.string [ 'Bugsnag.ApiKey', '@Config.Bugsnag.ApiKey' ], ''
+	webpackConfig	= ctx.object [ 'WebpackConfig', '@Config.Lambda.WebpackConfig' ], {}
 
 	# versionedArnExportName		= ctx.object [ 'Async', '@Config.Lambda.Async' ], {}
 
@@ -205,6 +206,7 @@ export default resource (ctx) ->
 			name
 			externals
 			files
+			webpackConfig
 			bugsnagApiKey
 			policyChecksum: policyChecksum ctx
 		}

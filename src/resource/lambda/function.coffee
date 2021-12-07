@@ -116,6 +116,7 @@ export default resource (ctx) ->
 	files			= ctx.object [ 'Files',	'@Config.Lambda.Files' ], {}
 	asyncConfig		= ctx.object [ 'Async', '@Config.Lambda.Async' ], {}
 	bugsnagApiKey	= ctx.string [ 'Bugsnag.ApiKey', '@Config.Bugsnag.ApiKey' ], ''
+	webpackConfig	= ctx.object [ 'WebpackConfig', '@Config.Lambda.WebpackConfig' ], {}
 
 	# versionedArnExportName		= ctx.object [ 'Async', '@Config.Lambda.Async' ], {}
 
@@ -172,6 +173,16 @@ export default resource (ctx) ->
 			when 'iot'		then iot ctx, ctx.name, event
 			else throw TypeError "Unknown lambda event type: \"#{type}\""
 
+	if Object.keys(asyncConfig).length
+		eventInvokeConfig(
+			ctx
+			"#{ ctx.name }AsyncConfig"
+			{
+				...asyncConfig
+				Name: Ref ctx.name
+			}
+			{ Region: region }
+		)
 
 	ctx.once 'cleanup', ->
 		dir = path.join process.cwd(), '.awsless', 'lambda'
@@ -195,7 +206,9 @@ export default resource (ctx) ->
 			name
 			externals
 			files
+			webpackConfig
 			bugsnagApiKey
+			policyChecksum: policyChecksum ctx
 		}
 
 		# checksum = createChecksum checksum, policyChecksum ctx
@@ -242,14 +255,3 @@ export default resource (ctx) ->
 				]
 			}
 		}
-
-		if Object.keys(asyncConfig).length
-			eventInvokeConfig(
-				ctx
-				"#{ ctx.name }AsyncConfig"
-				{
-					...asyncConfig
-					Name: Ref ctx.name
-				}
-				{ Region: region }
-			)

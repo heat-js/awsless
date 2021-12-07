@@ -1,6 +1,7 @@
 
 const TerserPlugin	= require('terser-webpack-plugin');
 const webpack		= require('webpack');
+const { merge }		= require('webpack-merge');
 const path			= require('path');
 const { expose }	= require('threads/worker');
 
@@ -29,10 +30,18 @@ const webpackOptions = {
 				loader: require.resolve('node-loader'),
 				test: /\.node$/,
 			},
+			{
+				loader: require.resolve('raw-loader'),
+				test: /\.html$/,
+			},
+			{
+				loader: require.resolve('raw-loader'),
+				test: /\.md$/,
+			},
 		],
 	},
 	resolve: {
-		extensions: [ '.js', '.jsx', '.coffee' ],
+		extensions: [ '.js', '.jsx', '.coffee', '.md', '.html' ],
 	},
 };
 
@@ -45,7 +54,7 @@ expose({
 		};
 
 		return new Promise(function(resolve, reject) {
-			const compiler = webpack(Object.assign({}, webpackOptions, {
+			const compiler = webpack(merge(webpackOptions, {
 				entry:	inputFile,
 				mode:	options.minimize ? 'production' : 'development',
 				devtool: options.minimize ? 'hidden-source-map' : false,
@@ -73,7 +82,7 @@ expose({
 					libraryTarget:					'commonjs',
 					strictModuleExceptionHandling:	true,
 				},
-			}));
+			}, options.webpackConfig));
 
 			compiler.run(function(error, stats) {
 				if(error) {

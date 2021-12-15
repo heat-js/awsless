@@ -245,7 +245,7 @@ export default resource (ctx) ->
 		output ctx, "#{ ctx.name }DomainName", {
 			Name:			"#{ Stack }-#{ ctx.name }-DomainName"
 			Value:			DomainName
-			Description:	'The Domain Name of the Website'
+			Description:	"The Domain Name of the #{ ctx.name }"
 		}
 
 		output ctx, "#{ ctx.name }DistributionDomainName", {
@@ -257,7 +257,7 @@ export default resource (ctx) ->
 		output ctx, "#{ ctx.name }DistributionId", {
 			Name:			"#{ Stack }-#{ ctx.name }-DistributionId"
 			Value:			Ref "#{ ctx.name }CloudFrontDistribution"
-			Description:	'The CloudFront Distribution ID of the Website'
+			Description:	"The CloudFront Distribution ID of the #{ ctx.name }"
 		}
 
 	# -------------------------------------------------------

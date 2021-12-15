@@ -6,6 +6,7 @@ import { run }		from '../../feature/terminal/task'
 import time			from '../../feature/performance/time'
 import { GetAtt, Split, Select, isArn, isFn, Sub }	from '../../feature/cloudformation/fn'
 import { parseDomain, ParseResultType }	from 'parse-domain'
+import output		from '../output'
 
 # getDataSourceType = (item) ->
 # 	return (

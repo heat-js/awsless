@@ -32,6 +32,10 @@ parse = (ctx) ->
 					Type:		'Task'
 					Resource:	task
 					Next:		"State#{ index + 2 }"
+					Catch: [ {
+						ErrorEquals: [ 'States.ALL' ]
+						Next: "State#{ index + 2 }"
+					} ]
 				}
 
 			when 'delay', 'wait', 'sleep'
@@ -53,6 +57,7 @@ parse = (ctx) ->
 	lastState = states[ states.length - 1 ]
 	if lastState
 		delete lastState.Next
+		delete lastState.Catch
 		lastState.End = true
 
 	# -------------------------------------------------------

@@ -86,7 +86,6 @@ export default resource (ctx) ->
 	DomainName			= ctx.string 'DomainName'
 	BucketName			= ctx.string [ 'BucketName', 'DomainName' ]
 	HostedZoneId		= ctx.string 'HostedZoneId', 'Z2FDTNDATAQYW2'
-	HostedZoneName		= formatHostedZoneName DomainName
 	Aliases				= ctx.array 'Aliases', []
 	AcmCertificateArn	= ctx.string 'Certificate', ''
 
@@ -111,7 +110,7 @@ export default resource (ctx) ->
 	ctx.addResource "#{ ctx.name }Route53Record", {
 		Type: 'AWS::Route53::RecordSet'
 		Properties: {
-			HostedZoneName
+			HostedZoneName: formatHostedZoneName DomainName
 			Name: "#{ DomainName }."
 			Type: 'A'
 			AliasTarget: {
@@ -127,7 +126,7 @@ export default resource (ctx) ->
 		ctx.addResource "#{ ctx.name }Alias#{ index }Route53Record", {
 			Type: 'AWS::Route53::RecordSet'
 			Properties: {
-				HostedZoneName
+				HostedZoneName: formatHostedZoneName alias
 				Name: "#{ alias }."
 				Type: 'A'
 				AliasTarget: {

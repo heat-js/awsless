@@ -183,7 +183,7 @@ export default resource (ctx) ->
 		Description:	'The Domain Name of the Website'
 	}
 
-	output ctx, "#{ ctx.name }DomainName", {
+	output ctx, "#{ ctx.name }DistributionDomainName", {
 		Name:			"#{ Stack }-#{ ctx.name }-Distribution-DomainName"
 		Value:			GetAtt "#{ ctx.name }CloudFrontDistribution", 'DomainName'
 		Description:	'The Domain Name of the CloudFrontDistribution'

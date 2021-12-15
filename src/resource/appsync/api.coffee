@@ -139,6 +139,7 @@ export default resource (ctx) ->
 
 	name				= ctx.string 'Name'
 	region				= ctx.string '#Region', ''
+	Stack 				= ctx.string '@Config.Stack'
 	DomainName			= ctx.string 'DomainName', ''
 	HostedZoneId		= ctx.string 'HostedZoneId', 'Z2FDTNDATAQYW2'
 	AcmCertificateArn	= ctx.string 'Certificate', ''

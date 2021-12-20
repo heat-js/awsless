@@ -142,6 +142,7 @@ export default resource (ctx) ->
 	Stack 				= ctx.string '@Config.Stack'
 	DomainName			= ctx.string 'DomainName', ''
 	HostedZoneId		= ctx.string 'HostedZoneId', 'Z2FDTNDATAQYW2'
+	Aliases				= ctx.array 'Aliases', []
 	AcmCertificateArn	= ctx.string 'Certificate', ''
 
 	sourceFiles	= ctx.string [ 'Path', 'Src', 'Source', 'SourceFiles' ]

@@ -172,11 +172,10 @@ export default resource (ctx) ->
 	# Make the route53 record set
 
 	if DomainName
-		HostedZoneName = formatHostedZoneName DomainName
 		ctx.addResource "#{ ctx.name }Route53Record", {
 			Type: 'AWS::Route53::RecordSet'
 			Properties: {
-				HostedZoneName
+				HostedZoneName = formatHostedZoneName DomainName
 				Name: "#{ DomainName }."
 				Type: 'A'
 				AliasTarget: {
@@ -185,6 +184,21 @@ export default resource (ctx) ->
 				}
 			}
 		}
+
+		for _, index in Aliases
+			alias = ctx.string "Aliases.#{ index }"
+			ctx.addResource "#{ ctx.name }Alias#{ index }Route53Record", {
+				Type: 'AWS::Route53::RecordSet'
+				Properties: {
+					HostedZoneName: formatHostedZoneName alias
+					Name: "#{ alias }."
+					Type: 'A'
+					AliasTarget: {
+						DNSName: GetAtt "#{ ctx.name }CloudFrontDistribution", 'DomainName'
+						HostedZoneId
+					}
+				}
+			}
 
 	# -------------------------------------------------------
 	# Make the cloudfront distribution
@@ -196,7 +210,7 @@ export default resource (ctx) ->
 				DistributionConfig: {
 					Enabled: true
 					DefaultRootObject: '/'
-					Aliases: [ DomainName ]
+					Aliases: [ DomainName, ...Aliases ]
 					PriceClass: 'PriceClass_All'
 					HttpVersion: 'http2'
 					ViewerCertificate: {

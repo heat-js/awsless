@@ -175,7 +175,7 @@ export default resource (ctx) ->
 		ctx.addResource "#{ ctx.name }Route53Record", {
 			Type: 'AWS::Route53::RecordSet'
 			Properties: {
-				HostedZoneName = formatHostedZoneName DomainName
+				HostedZoneName: formatHostedZoneName DomainName
 				Name: "#{ DomainName }."
 				Type: 'A'
 				AliasTarget: {
